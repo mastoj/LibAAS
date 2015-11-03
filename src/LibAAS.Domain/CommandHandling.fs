@@ -8,20 +8,10 @@ type AggregateDef<'TState, 'TCommand, 'TEvent> = {
 
 let validateCommand command = command |> ok
 
-let getEvents eventStore (command:Command) = 
-    let (AggregateId aggregateId, commandData) = command
-    eventStore.GetEvents (StreamId aggregateId)
-    >>= (fun (StreamId aggId, StreamVersion ver, events) -> (AggregateId aggId, ver, events, command) |> ok)
-
-let buildState aggregateDef (aggregateId, version, events, command) =
-    let evolver res e = bind (aggregateDef.EvolveOne e) res
-    let state = events |> List.fold evolver (aggregateDef.Init |> ok)
+let buildState evolveOne init (aggregateId, version, events, command) =
+    let evolver res e = bind (evolveOne e) res
+    let state = events |> List.fold evolver (init |> ok)
     state >>= (fun s -> (aggregateId, version, s, command) |> ok)
-
-let executeCommand aggregateDef (aggregateId, currentVersion, state, command) =
-    command 
-    |> (aggregateDef.ExecuteCommand state)
-    >>= (fun es -> (aggregateId, currentVersion, es, command) |> ok)
 
 let (|LoanCommand|) command =
     match command with
@@ -29,22 +19,29 @@ let (|LoanCommand|) command =
     | ReturnItem _ -> LoanCommand
     | PayFine _ -> LoanCommand
 
-let getAggregateDef (aggregateId, command) : AggregateDef<Loan.LoanState, Command, Event> = 
-    match command with
+let getCommandHandler commandData =
+    match commandData with
     | LoanCommand -> 
-        { EvolveOne = Loan.evolveOne
-          ExecuteCommand = Loan.executeCommand
-          Init = Loan.init }
+        (buildState Loan.evolveOne Loan.init)
+        >>+ (fun (_,_,s,command) -> Loan.executeCommand s command)
+
+let executeCommand (aggregateId, currentVersion, events, command) =
+    let (aggId, commandData) = command
+    (aggregateId, currentVersion, events, command)
+    |> getCommandHandler commandData
+    >>= (fun es -> (aggregateId, currentVersion, es, command) |> ok)
+
+let getEvents eventStore (command:Command) = 
+    let (AggregateId aggregateId, commandData) = command
+    eventStore.GetEvents (StreamId aggregateId)
+    >>= (fun (StreamId aggId, StreamVersion ver, events) -> (AggregateId aggId, ver, events, command) |> ok)
 
 let saveEvents eventStore (AggregateId aggregateId, expectedVersion, events, command) = 
     eventStore.SaveEvents (StreamId aggregateId) (StreamVersion expectedVersion) events
 
 let execute (eventStore:EventStore<Event,Error>) (command:Command) = 
-    let aggregateDef = getAggregateDef command
-
     command 
     |> validateCommand
     >>= getEvents eventStore
-    >>= buildState aggregateDef
-    >>= executeCommand aggregateDef
+    >>= executeCommand
     >>= saveEvents eventStore

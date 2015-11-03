@@ -35,7 +35,7 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
             [aggId, ItemReturned { Loan = data.Loan; ReturnDate = now }] |> ok
     | _ -> InvalidState |> fail
 
-let executeCommand state command = 
+let executeCommand state command =
     match state with
     | LoanInit -> handleAtInit command
     | LoanCreated data -> command |> handleAtCreated data
