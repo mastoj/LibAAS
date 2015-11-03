@@ -16,4 +16,4 @@ type EventData =
     | FineCreated of FineCreated
     | FinePaid of FinePaid
 
-type Event = AggregateId * EventData
+type Events = AggregateId * EventData list

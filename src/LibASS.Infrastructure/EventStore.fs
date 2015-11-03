@@ -46,20 +46,21 @@ let eventSourcingAgent<'T> (inbox:Agent<Messages<'T>>) =
 
 type EventStore<'TEvent, 'TError> = 
     {
-        GetEvents: StreamId -> Result<StreamId*StreamVersion*'TEvent list, 'TError>
+        GetEvents: StreamId -> Result<StreamVersion*'TEvent list, 'TError>
         SaveEvents: StreamId -> StreamVersion -> 'TEvent list -> Result<'TEvent list, 'TError>
     }
 let createEventsourcingAgent<'T>() = Agent.Start(eventSourcingAgent<'T>)
 
 let createEventStore<'TEvent, 'TError> (versionError:'TError) =
     let agent = createEventsourcingAgent<'TEvent>()
-    let getEvents aggregateId = 
-        let result = (fun r -> GetEvents (aggregateId, r)) |> postAsyncReply agent |> Async.RunSynchronously
+    let getEvents streamId = 
+        let result = (fun r -> GetEvents (streamId, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
-        | Some events -> (aggregateId, StreamVersion (events |> List.length), events) |> ok
-        | None -> (aggregateId, StreamVersion 0, []) |> ok
-    let saveEvents aggregateId expectedVersion events = 
-        let result = (fun r -> SaveEvents(aggregateId, expectedVersion, events, r)) |> postAsyncReply agent |> Async.RunSynchronously
+        | Some events -> (StreamVersion (events |> List.length), events) |> ok
+        | None -> (StreamVersion 0, []) |> ok
+
+    let saveEvents streamId expectedVersion events = 
+        let result = (fun r -> SaveEvents(streamId, expectedVersion, events, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
         | Ok -> events |> ok
         | VersionConflict -> versionError |> fail

@@ -19,7 +19,7 @@ let handleAtInit ((aggId:AggregateId), commandData) =
               Item = i
               LibraryId = libraryId }
         let now = DateTime.Today
-        [aggId,ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
+        [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
     | _ -> InvalidState |> fail
 
 let handleAtCreated data ((aggId:AggregateId), commandData) =
@@ -31,9 +31,9 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
         let fine = 10 * daysLate
         match now > duedate with
         | true -> 
-            [aggId, ItemLate { Loan = data.Loan; ReturnDate = now; NumberOfDaysLate = daysLate; Fine = Fine fine }] |> ok
+            [ItemLate { Loan = data.Loan; ReturnDate = now; NumberOfDaysLate = daysLate; Fine = Fine fine }] |> ok
         | false ->
-            [aggId, ItemReturned { Loan = data.Loan; ReturnDate = now }] |> ok
+            [ItemReturned { Loan = data.Loan; ReturnDate = now }] |> ok
     | _ -> InvalidState |> fail
 
 let executeCommand state command =
@@ -43,16 +43,16 @@ let executeCommand state command =
     | _ -> InvalidState |> fail
 
 let evolveAtInit = function
-    | aggId, ItemLoaned (loan, loanDate, dueDate) -> 
+    | ItemLoaned (loan, loanDate, dueDate) -> 
         LoanCreated {Loan = loan; DueDate = dueDate; LoanDate = loanDate} |> ok
     | _ -> InvalidState |> fail
 
 let evolveAtCreated data = function
-    | aggId, ItemReturned eData -> Returned (data, eData.ReturnDate) |> ok
-    | aggId, ItemLate eData -> LateReturn (data, eData.Fine, eData.ReturnDate) |> ok
+    | ItemReturned eData -> Returned (data, eData.ReturnDate) |> ok
+    | ItemLate eData -> LateReturn (data, eData.Fine, eData.ReturnDate) |> ok
     | _ -> InvalidState |> fail
 
-let evolveOne (event:Event) state = 
+let evolveOne (event:EventData) state = 
     match state with
     | LoanInit -> evolveAtInit event
     | LoanCreated data -> event |> evolveAtCreated data

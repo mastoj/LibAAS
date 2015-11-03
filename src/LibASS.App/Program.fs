@@ -4,7 +4,7 @@ open System
 
 [<EntryPoint>]
 let main argv = 
-    let eventStore = createEventStore<Event, Error> (Error.VersionConflict "Version conflict")
+    let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
     let executer = execute eventStore
 
     let newGuid() = Guid.NewGuid()

@@ -29,12 +29,12 @@ let executeCommand (aggregateId, currentVersion, events, command) =
 let getEvents eventStore (command:Command) = 
     let (AggregateId aggregateId, commandData) = command
     eventStore.GetEvents (StreamId aggregateId)
-    >>= (fun (StreamId aggId, StreamVersion ver, events) -> (AggregateId aggId, ver, events, command) |> ok)
+    >>= (fun (StreamVersion ver, events) -> (AggregateId aggregateId, ver, events, command) |> ok)
 
 let saveEvents eventStore (AggregateId aggregateId, expectedVersion, events, command) = 
     eventStore.SaveEvents (StreamId aggregateId) (StreamVersion expectedVersion) events
 
-let execute (eventStore:EventStore<Event,Error>) (command:Command) = 
+let execute (eventStore:EventStore<EventData,Error>) (command:Command) = 
     command 
     |> validateCommand
     >>= getEvents eventStore

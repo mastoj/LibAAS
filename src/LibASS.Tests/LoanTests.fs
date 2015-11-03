@@ -23,8 +23,7 @@ module ``When loaning an item`` =
                      LibraryId = libraryId }
         Given []
         |> When (aggId, LoanItem (LoanId loanGuid, userId, itemId, libraryId))
-        |> Then (([(aggId,
-                    ItemLoaned 
-                      ( loan,
-                        LoanDate System.DateTime.Today,
-                        DueDate (System.DateTime.Today.AddDays(7.))))]) |> ok)
+        |> Then ([ItemLoaned 
+                    ( loan,
+                      LoanDate System.DateTime.Today,
+                      DueDate (System.DateTime.Today.AddDays(7.)))] |> ok)
