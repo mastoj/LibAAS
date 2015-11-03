@@ -1,5 +1,7 @@
-﻿module LibASS.Tests.Specification
+﻿[<AutoOpen>]
+module LibASS.Tests.Specification
 open EventStore
+open Swensen.Unquote
 
 type Specification = 
     {
@@ -13,9 +15,9 @@ let Given preCondition =
       Command = None
       PostCondition = None }
 
-let When spec command = {spec with Command = Some command}
+let When command spec = {spec with Command = Some command}
 
-let Then spec (postCondition: Result<Event list, Error>) =
+let Then (postCondition: Result<Event list, Error>) spec =
     let finalSpec = {spec with PostCondition = Some postCondition}
     let eventStore = createEventStore<Event,Error> (Error.VersionConflict "Invalid version when saving")
     let executer = CommandHandling.execute eventStore
@@ -28,4 +30,5 @@ let Then spec (postCondition: Result<Event list, Error>) =
     finalSpec.PreCondition |> savePreConditions
     let actual = finalSpec.Command |> Option.get |> executer
     let expected = finalSpec.PostCondition |> Option.get
-    actual = expected
+
+    test <@ actual = expected @>

@@ -1,10 +1,5 @@
 ﻿[<AutoOpen>]
 module CommandHandling
-type AggregateDef<'TState, 'TCommand, 'TEvent> = {
-    EvolveOne: 'TEvent -> 'TState -> Result<'TState, Error>
-    ExecuteCommand: 'TState -> 'TCommand -> Result<'TEvent list, Error>
-    Init: 'TState
-}
 
 let validateCommand command = command |> ok
 

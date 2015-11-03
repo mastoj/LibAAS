@@ -8,12 +8,12 @@ let main argv =
     let executer = execute eventStore
 
     let newGuid() = Guid.NewGuid()
-    let loanItem = {LoanId = LoanId (newGuid()); UserId = UserId (newGuid()); ItemId = ItemId (newGuid()); LibraryId = LibraryId (newGuid())}
-    let commandData = LoanItem loanItem
+    let loanId = LoanId (newGuid())
+    let commandData = LoanItem(loanId, UserId (newGuid()), ItemId (newGuid()), LibraryId (newGuid()))
     let aggId = AggregateId (Guid.NewGuid())
 
     let result = (aggId, commandData) |> executer
-    let returnResult = (aggId, ReturnItem { LoanId = loanItem.LoanId}) |> executer
+    let returnResult = (aggId, ReturnItem { LoanId = loanId}) |> executer
     printfn "Result: %A" result
     printfn "Return result: %A" returnResult
 

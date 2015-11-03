@@ -1,7 +1,7 @@
 ﻿module Loan
 open System
 
-type LoanData = {Loan: Loan; LoanDate: DateTime; DueDate: DateTime}
+type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}
 type LoanState = 
     | LoanCreated of LoanData
     | LateReturn of LoanData * Fine * DateTime
@@ -11,24 +11,25 @@ type LoanState =
 
 let handleAtInit ((aggId:AggregateId), commandData) = 
     match commandData with
-    | LoanItem item -> 
-        let i = item.ItemId,(Book { Title = Title "A book"; Author = Author "A author"})
+    | LoanItem (loanId, userId, itemId, libraryId) -> 
+        let i = itemId,(Book { Title = Title "A book"; Author = Author "A author"})
         let loan = 
-            { LoanId = item.LoanId
-              UserId = item.UserId
+            { LoanId = loanId
+              UserId = userId
               Item = i
-              LibraryId = item.LibraryId }
-        let now = DateTime.Now
-        [aggId,ItemLoaned { Loan = loan; LoanDate = now; DueDate = now.AddDays(7.) }] |> ok
+              LibraryId = libraryId }
+        let now = DateTime.Today
+        [aggId,ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
     | _ -> InvalidState |> fail
 
 let handleAtCreated data ((aggId:AggregateId), commandData) =
     match commandData with
     | ReturnItem cData -> 
         let now = DateTime.Now
-        let daysLate = (now - data.DueDate).Days
+        let (DueDate duedate) = data.DueDate
+        let daysLate = (now - duedate).Days
         let fine = 10 * daysLate
-        match now > data.DueDate with
+        match now > duedate with
         | true -> 
             [aggId, ItemLate { Loan = data.Loan; ReturnDate = now; NumberOfDaysLate = daysLate; Fine = Fine fine }] |> ok
         | false ->
@@ -42,8 +43,8 @@ let executeCommand state command =
     | _ -> InvalidState |> fail
 
 let evolveAtInit = function
-    | aggId, ItemLoaned item -> 
-        LoanCreated {Loan = item.Loan; DueDate = item.DueDate; LoanDate = item.LoanDate} |> ok
+    | aggId, ItemLoaned (loan, loanDate, dueDate) -> 
+        LoanCreated {Loan = loan; DueDate = dueDate; LoanDate = loanDate} |> ok
     | _ -> InvalidState |> fail
 
 let evolveAtCreated data = function

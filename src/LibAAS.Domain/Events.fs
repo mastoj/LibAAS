@@ -10,7 +10,7 @@ type FineCreated = { Loan: Loan; Amount: int; DueDate: DateTime }
 type FinePaid = { Loan: Loan; Amount: int; Date: DateTime }
 
 type EventData =
-    | ItemLoaned of ItemLoaned
+    | ItemLoaned of Loan*LoanDate*DueDate
     | ItemReturned of ItemReturned
     | ItemLate of ItemLate
     | FineCreated of FineCreated
