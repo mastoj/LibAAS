@@ -13,8 +13,9 @@ let main argv =
     let aggId = AggregateId (Guid.NewGuid())
 
     let result = (aggId, commandData) |> executer
+    let returnResult = (aggId, ReturnItem { LoanId = loanItem.LoanId}) |> executer
     printfn "Result: %A" result
+    printfn "Return result: %A" returnResult
 
-    printfn "%A" argv
     Console.ReadLine() |> ignore
     0 // return an integer exit code

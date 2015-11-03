@@ -26,7 +26,7 @@ let executeCommand aggregateDef (aggregateId, currentVersion, state, command) =
 let (|LoanCommand|) command =
     match command with
     | LoanItem _ -> LoanCommand
-    | ReturnBook _ -> LoanCommand
+    | ReturnItem _ -> LoanCommand
     | PayFine _ -> LoanCommand
 
 let getAggregateDef (aggregateId, command) : AggregateDef<Loan.LoanState, Command, Event> = 
