@@ -1,13 +1,17 @@
 ﻿[<AutoOpen>]
 module EventStore
+open System
+
+type StreamId = StreamId of Guid
+type StreamVersion = StreamVersion of int
 
 type SaveResult = 
     | Ok
     | VersionConflict
 
 type Messages<'T> = 
-    | GetEvents of AggregateId * AsyncReplyChannel<'T list option>
-    | SaveEvents of AggregateId * Version * 'T list * AsyncReplyChannel<SaveResult>
+    | GetEvents of StreamId * AsyncReplyChannel<'T list option>
+    | SaveEvents of StreamId * StreamVersion * 'T list * AsyncReplyChannel<SaveResult>
 
 let saveEvents state (id, expectedVersion, events, (replyChannel:AsyncReplyChannel<SaveResult>)) = 
     match state |> Map.tryFind id with
@@ -15,7 +19,7 @@ let saveEvents state (id, expectedVersion, events, (replyChannel:AsyncReplyChann
         replyChannel.Reply(Ok)
         state |> Map.add id events
     | Some existingEvents ->
-        let currentVersion = existingEvents |> List.length
+        let currentVersion = existingEvents |> List.length |> StreamVersion
         match currentVersion = expectedVersion with
         | true -> 
             replyChannel.Reply(Ok)
@@ -40,24 +44,24 @@ let eventSourcingAgent<'T> (inbox:Agent<Messages<'T>>) =
         }
     loop initState
 
-type EventStore<'TEvent> = 
+type EventStore<'TEvent, 'TError> = 
     {
-        GetEvents: AggregateId -> Result<AggregateId*Version*'TEvent list, Error>
-        SaveEvents: AggregateId -> Version -> 'TEvent list -> Result<'TEvent list, Error>
+        GetEvents: StreamId -> Result<StreamId*StreamVersion*'TEvent list, 'TError>
+        SaveEvents: StreamId -> StreamVersion -> 'TEvent list -> Result<'TEvent list, 'TError>
     }
 let createEventsourcingAgent<'T>() = Agent.Start(eventSourcingAgent<'T>)
 
-let createEventStore<'TEvent>() =
+let createEventStore<'TEvent, 'TError> (versionError:'TError) =
     let agent = createEventsourcingAgent<'TEvent>()
     let getEvents aggregateId = 
         let result = (fun r -> GetEvents (aggregateId, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
-        | Some events -> (aggregateId, (events |> List.length), events) |> ok
-        | None -> (aggregateId, 0, []) |> ok
+        | Some events -> (aggregateId, StreamVersion (events |> List.length), events) |> ok
+        | None -> (aggregateId, StreamVersion 0, []) |> ok
     let saveEvents aggregateId expectedVersion events = 
         let result = (fun r -> SaveEvents(aggregateId, expectedVersion, events, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
         | Ok -> events |> ok
-        | VersionConflict -> (Error.VersionConflict "Unmet req. expected version") |> fail
+        | VersionConflict -> versionError |> fail
 
     { GetEvents = getEvents; SaveEvents = saveEvents}

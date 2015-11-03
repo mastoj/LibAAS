@@ -1,12 +1,15 @@
 ﻿module Loan
 open System
 
-type LoanCreated = {Loan: Loan; LoanDate: DateTime; DueDate: DateTime}
+type LoanData = {Loan: Loan; LoanDate: DateTime; DueDate: DateTime}
 type LoanState = 
-    | LoanCreated of LoanCreated
+    | LoanCreated of LoanData
+    | LateReturn of LoanData * Fine * DateTime
+    | LoanPaid of LoanData * Fine
+    | Returned of LoanData * DateTime
     | LoanInit
 
-let handleAtInit (aggId, commandData) = 
+let handleAtInit ((aggId:AggregateId), commandData) = 
     match commandData with
     | LoanItem item -> 
         let i = item.ItemId,(Book { Title = Title "A book"; Author = Author "A author"})
@@ -16,7 +19,7 @@ let handleAtInit (aggId, commandData) =
               Item = i
               LibraryId = item.LibraryId }
         let now = DateTime.Now
-        [ItemLoaned { Loan = loan; LoanDate = now; DueDate = now.AddDays(7.) }] |> ok
+        [aggId,ItemLoaned { Loan = loan; LoanDate = now; DueDate = now.AddDays(7.) }] |> ok
     | _ -> InvalidState |> fail
 
 let executeCommand state command = 
@@ -25,11 +28,11 @@ let executeCommand state command =
     | _ -> InvalidState |> fail
 
 let evolveAtInit = function
-    | ItemLoaned item -> 
+    | aggId, ItemLoaned item -> 
         LoanCreated {Loan = item.Loan; DueDate = item.DueDate; LoanDate = item.LoanDate} |> ok
     | _ -> InvalidState |> fail
 
-let evolveOne event state = 
+let evolveOne (event:Event) state = 
     match state with
     | LoanInit -> evolveAtInit event
     | _ -> InvalidState |> fail

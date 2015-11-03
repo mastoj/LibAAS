@@ -17,13 +17,13 @@ let When spec command = {spec with Command = Some command}
 
 let Then spec (postCondition: Result<Event list, Error>) =
     let finalSpec = {spec with PostCondition = Some postCondition}
-    let eventStore = createEventStore<Event>()
+    let eventStore = createEventStore<Event,Error> (Error.VersionConflict "Invalid version when saving")
     let executer = CommandHandling.execute eventStore
 
     let savePreConditions preCondition = 
         preCondition 
-        |> List.groupBy (fun (aggId, event) -> aggId)
-        |> List.iter (fun (aggId, events) -> eventStore.SaveEvents aggId 0 (events |> List.map snd) |> ignore)
+        |> List.groupBy fst
+        |> List.iter (fun (AggregateId aggId, events) -> eventStore.SaveEvents (StreamId aggId) (StreamVersion 0) (events |> List.map snd) |> ignore)
 
     finalSpec.PreCondition |> savePreConditions
     let actual = finalSpec.Command |> Option.get |> executer

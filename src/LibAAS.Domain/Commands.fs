@@ -2,7 +2,7 @@
 module Commands
 type LoanItem = { LoanId: LoanId; UserId: UserId; ItemId: ItemId; LibraryId: LibraryId }
 type ReturnItem = { LoanId: LoanId }
-type PayFine = { FineId: FineId; Amount: int }
+type PayFine = { LoanId: LoanId; Amount: int }
 
 type CommandData = 
     | LoanItem of LoanItem

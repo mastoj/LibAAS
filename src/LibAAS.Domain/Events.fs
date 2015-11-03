@@ -8,7 +8,7 @@ type ItemReturned = { Loan: Loan; }
 type ItemLate = { Loan: Loan; ReturnDate: DateTime; NumberOfDaysLate: int }
 
 // Fine
-type FineCreated = { FineId: FineId; Loan: Loan; Amount: int; DueDate: DateTime }
+type FineCreated = { Loan: Loan; Amount: int; DueDate: DateTime }
 type FinePaid = { Loan: Loan; Amount: int; Date: DateTime }
 
 type EventData =

@@ -1,4 +1,5 @@
-﻿module CommandHandling
+﻿[<AutoOpen>]
+module CommandHandling
 type AggregateDef<'TState, 'TCommand, 'TEvent> = {
     EvolveOne: 'TEvent -> 'TState -> Result<'TState, Error>
     ExecuteCommand: 'TState -> 'TCommand -> Result<'TEvent list, Error>
@@ -7,9 +8,10 @@ type AggregateDef<'TState, 'TCommand, 'TEvent> = {
 
 let validateCommand command = command |> ok
 
-let getEvents eventStore command = 
-    eventStore.GetEvents (command |> fst)
-    >>= (fun (aggId, ver, events) -> (aggId, ver, events, command) |> ok)
+let getEvents eventStore (command:Command) = 
+    let (AggregateId aggregateId, commandData) = command
+    eventStore.GetEvents (StreamId aggregateId)
+    >>= (fun (StreamId aggId, StreamVersion ver, events) -> (AggregateId aggId, ver, events, command) |> ok)
 
 let buildState aggregateDef (aggregateId, version, events, command) =
     let evolver res e = bind (aggregateDef.EvolveOne e) res
@@ -27,17 +29,17 @@ let (|LoanCommand|) command =
     | ReturnBook _ -> LoanCommand
     | PayFine _ -> LoanCommand
 
-let getAggregateDef (aggregateId, command) = 
+let getAggregateDef (aggregateId, command) : AggregateDef<Loan.LoanState, Command, Event> = 
     match command with
     | LoanCommand -> 
         { EvolveOne = Loan.evolveOne
           ExecuteCommand = Loan.executeCommand
           Init = Loan.init }
 
-let saveEvents eventStore (aggregateId, expectedVersion, events, command) = 
-    eventStore.SaveEvents aggregateId expectedVersion events
+let saveEvents eventStore (AggregateId aggregateId, expectedVersion, events, command) = 
+    eventStore.SaveEvents (StreamId aggregateId) (StreamVersion expectedVersion) events
 
-let execute eventStore command = 
+let execute (eventStore:EventStore<Event,Error>) (command:Command) = 
     let aggregateDef = getAggregateDef command
 
     command 
