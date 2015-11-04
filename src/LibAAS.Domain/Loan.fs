@@ -4,9 +4,9 @@ open System
 type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}
 type LoanState = 
     | LoanCreated of LoanData
-    | LateReturn of LoanData * Fine * DateTime
+    | LateReturn of LoanData * Fine * ReturnDate
     | LoanPaid of LoanData * Fine
-    | Returned of LoanData * DateTime
+    | Returned of LoanData * ReturnDate
     | LoanInit
 
 let handleAtInit ((aggId:AggregateId), commandData) = 
@@ -29,11 +29,10 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
         let (DueDate duedate) = data.DueDate
         let daysLate = (now - duedate).Days
         let fine = 10 * daysLate
-        match now > duedate with
-        | true -> 
-            [ItemLate { Loan = data.Loan; ReturnDate = now; NumberOfDaysLate = daysLate; Fine = Fine fine }] |> ok
-        | false ->
-            [ItemReturned { Loan = data.Loan; ReturnDate = now }] |> ok
+        if now > duedate then 
+            [ItemLate (data.Loan, ReturnDate now, daysLate, Fine fine )] |> ok
+        else 
+            [ItemReturned (data.Loan, ReturnDate now )] |> ok
     | _ -> InvalidState |> fail
 
 let executeCommand state command =
@@ -48,8 +47,8 @@ let evolveAtInit = function
     | _ -> InvalidState |> fail
 
 let evolveAtCreated data = function
-    | ItemReturned eData -> Returned (data, eData.ReturnDate) |> ok
-    | ItemLate eData -> LateReturn (data, eData.Fine, eData.ReturnDate) |> ok
+    | ItemReturned (loan, returnDate) -> Returned (data, returnDate) |> ok
+    | ItemLate (loan, returnDate, daysLate, fine) -> LateReturn (data, fine, returnDate) |> ok
     | _ -> InvalidState |> fail
 
 let evolveOne (event:EventData) state = 

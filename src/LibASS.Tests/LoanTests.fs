@@ -21,6 +21,7 @@ module ``When loaning an item`` =
                           Book { Title = Title "A book"
                                  Author = Author "A author"})
                      LibraryId = libraryId }
+
         Given []
         |> When (aggId, LoanItem (LoanId loanGuid, userId, itemId, libraryId))
         |> Then ([ItemLoaned 

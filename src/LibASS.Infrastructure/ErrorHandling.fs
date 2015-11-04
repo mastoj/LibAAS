@@ -14,7 +14,4 @@ let fail x = Failure x
 
 let (>>=) result func = bind func result
 
-let combine f1 f2 = 
-    fun x -> x |> f1 >>= f2
-
-let (>>+) f1 f2 = combine f1 f2
+let (>=>) f1 f2 = f1 >> (bind f2)

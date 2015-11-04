@@ -2,18 +2,11 @@
 module Events
 open System
 
-// Loan
-type ItemLoaned = { Loan: Loan; LoanDate: DateTime; DueDate: DateTime }
-type ItemReturned = { Loan: Loan; ReturnDate: DateTime }
-type ItemLate = { Loan: Loan; ReturnDate: DateTime; NumberOfDaysLate: int; Fine: Fine }
-type FineCreated = { Loan: Loan; Amount: int; DueDate: DateTime }
-type FinePaid = { Loan: Loan; Amount: int; Date: DateTime }
-
 type EventData =
-    | ItemLoaned of Loan*LoanDate*DueDate
-    | ItemReturned of ItemReturned
-    | ItemLate of ItemLate
-    | FineCreated of FineCreated
-    | FinePaid of FinePaid
+    | ItemLoaned of loan:Loan*loanDate:LoanDate*dueDate:DueDate
+    | ItemReturned of loan:Loan*returnDate:ReturnDate
+    | ItemLate of loan:Loan*returnDate:ReturnDate*numberOfDaysLate:int*fine:Fine
+    | FineCreated of loan:Loan*amount:int*dueDate:DueDate
+    | FinePaid of loan:Loan*amount:int*date:DateTime
 
 type Events = AggregateId * EventData list

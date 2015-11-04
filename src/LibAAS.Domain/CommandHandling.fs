@@ -18,7 +18,7 @@ let getCommandHandler commandData =
     match commandData with
     | LoanCommand -> 
         (buildState Loan.evolveOne Loan.init)
-        >>+ (fun (_,_,s,command) -> Loan.executeCommand s command)
+        >=> (fun (_,_,s,command) -> Loan.executeCommand s command)
 
 let executeCommand (aggregateId, currentVersion, events, command) =
     let (aggId, commandData) = command
@@ -26,7 +26,7 @@ let executeCommand (aggregateId, currentVersion, events, command) =
     |> getCommandHandler commandData
     >>= (fun es -> (aggregateId, currentVersion, es, command) |> ok)
 
-let getEvents eventStore (command:Command) = 
+let getEvents eventStore command = 
     let (AggregateId aggregateId, commandData) = command
     eventStore.GetEvents (StreamId aggregateId)
     >>= (fun (StreamVersion ver, events) -> (AggregateId aggregateId, ver, events, command) |> ok)
@@ -34,7 +34,7 @@ let getEvents eventStore (command:Command) =
 let saveEvents eventStore (AggregateId aggregateId, expectedVersion, events, command) = 
     eventStore.SaveEvents (StreamId aggregateId) (StreamVersion expectedVersion) events
 
-let execute (eventStore:EventStore<EventData,Error>) (command:Command) = 
+let execute eventStore command = 
     command 
     |> validateCommand
     >>= getEvents eventStore
