@@ -1,5 +1,6 @@
 ﻿[<AutoOpen>]
 module CommandHandling
+open LibASS.Contracts
 
 let validateCommand command = command |> ok
 
@@ -8,17 +9,21 @@ let buildState evolveOne init (aggregateId, version, events, command) =
     let state = events |> List.fold evolver (init |> ok)
     state >>= (fun s -> (aggregateId, version, s, command) |> ok)
 
-let (|LoanCommand|) command =
+let (|LoanCommand|InventoryCommand|) command =
     match command with
     | LoanItem _ -> LoanCommand
     | ReturnItem _ -> LoanCommand
     | PayFine _ -> LoanCommand
+    | RegisterInventoryItem _ -> InventoryCommand
 
 let getCommandHandler commandData =
     match commandData with
     | LoanCommand -> 
         (buildState Loan.evolveOne Loan.init)
         >=> (fun (_,_,s,command) -> Loan.executeCommand s command)
+    | InventoryCommand ->
+        (buildState Inventory.evolveOne Inventory.init)
+        >=> (fun (_,_,s,command) -> Inventory.executeCommand s command)
 
 let executeCommand (aggregateId, currentVersion, events, command) =
     let (aggId, commandData) = command

@@ -1,4 +1,5 @@
 ﻿module Loan
+open LibASS.Contracts
 open System
 
 type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}

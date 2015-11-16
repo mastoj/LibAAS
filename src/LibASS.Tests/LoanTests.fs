@@ -1,5 +1,6 @@
 ﻿namespace LibASS.Tests.LoanTests
 open System
+open LibASS.Contracts
 open LibASS.Tests.Specification
 open Xunit
 
@@ -8,7 +9,7 @@ module ``When loaning an item`` =
     let newAggId() = AggregateId (newGuid())
 
     [<Fact>]
-    let ``the should be created and due date set`` () =
+    let ``the loan should be created and due date set`` () =
         let loanGuid = newGuid()
         let userId = UserId (newGuid())
         let itemId = ItemId (newGuid())

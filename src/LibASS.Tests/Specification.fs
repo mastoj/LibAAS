@@ -1,5 +1,6 @@
 ﻿[<AutoOpen>]
 module LibASS.Tests.Specification
+open LibASS.Contracts
 open EventStore
 open Swensen.Unquote
 

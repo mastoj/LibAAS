@@ -92,6 +92,11 @@
       <Project>{21160132-ecf3-4e8c-a2e1-7c2c149f9ea8}</Project>
       <Private>True</Private>
     </ProjectReference>
+    <ProjectReference Include="..\LibASS.Contracts\LibASS.Contracts.fsproj">
+      <Name>LibASS.Contracts</Name>
+      <Project>{5c38a911-dcdc-4381-98e9-9f6808788d4a}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\LibASS.Infrastructure\LibASS.Infrastructure.fsproj">
       <Name>LibASS.Infrastructure</Name>
       <Project>{e0012e26-9a9f-429b-a5f3-e13211c28ca2}</Project>

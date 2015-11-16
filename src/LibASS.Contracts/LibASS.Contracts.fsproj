@@ -5,14 +5,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>21160132-ecf3-4e8c-a2e1-7c2c149f9ea8</ProjectGuid>
+    <ProjectGuid>5c38a911-dcdc-4381-98e9-9f6808788d4a</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>LibAAS.App</RootNamespace>
-    <AssemblyName>LibAAS.Domain</AssemblyName>
+    <RootNamespace>LibASS.Contracts</RootNamespace>
+    <AssemblyName>LibASS.Contracts</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
-    <Name>LibAAS.Domain</Name>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Name>LibASS.Contracts</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,9 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\LibAAS.App.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\LibASS.Contracts.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,9 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\LibAAS.App.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\LibASS.Contracts.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -48,22 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Inventory.fs" />
-    <Compile Include="Loan.fs" />
-    <Compile Include="CommandHandling.fs" />
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LibASS.Contracts\LibASS.Contracts.fsproj">
-      <Name>LibASS.Contracts</Name>
-      <Project>{5c38a911-dcdc-4381-98e9-9f6808788d4a}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\LibASS.Infrastructure\LibASS.Infrastructure.fsproj">
-      <Name>LibASS.Infrastructure</Name>
-      <Project>{e0012e26-9a9f-429b-a5f3-e13211c28ca2}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="Types.fs" />
+    <Compile Include="Commands.fs" />
+    <Compile Include="Events.fs" />
+    <None Include="Script.fsx" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

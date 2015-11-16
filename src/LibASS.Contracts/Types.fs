@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module Types
+module LibASS.Contracts.Types
 open System
  
 type AggregateId = AggregateId of Guid
