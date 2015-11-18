@@ -21,7 +21,7 @@ let handleAtInit ((aggId:AggregateId), commandData) =
               LibraryId = libraryId }
         let now = DateTime.Today
         [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
-    | _ -> InvalidState |> fail
+    | _ -> InvalidState "Loan at init" |> fail
 
 let handleAtCreated data ((aggId:AggregateId), commandData) =
     match commandData with
@@ -34,28 +34,28 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
             [ItemLate (data.Loan, ReturnDate now, daysLate, Fine fine )] |> ok
         else 
             [ItemReturned (data.Loan, ReturnDate now )] |> ok
-    | _ -> InvalidState |> fail
+    | _ -> InvalidState "Loan at created" |> fail
 
 let executeCommand state command =
     match state with
     | LoanInit -> handleAtInit command
     | LoanCreated data -> command |> handleAtCreated data
-    | _ -> InvalidState |> fail
+    | _ -> InvalidState "Loan" |> fail
 
 let evolveAtInit = function
     | ItemLoaned (loan, loanDate, dueDate) -> 
         LoanCreated {Loan = loan; DueDate = dueDate; LoanDate = loanDate} |> ok
-    | _ -> InvalidState |> fail
+    | _ -> InvalidStateTransition "Loan at init" |> fail
 
 let evolveAtCreated data = function
     | ItemReturned (loan, returnDate) -> Returned (data, returnDate) |> ok
     | ItemLate (loan, returnDate, daysLate, fine) -> LateReturn (data, fine, returnDate) |> ok
-    | _ -> InvalidState |> fail
+    | _ -> InvalidState "Loan at created" |> fail
 
 let evolveOne (event:EventData) state = 
     match state with
     | LoanInit -> evolveAtInit event
     | LoanCreated data -> event |> evolveAtCreated data
-    | _ -> InvalidState |> fail
+    | _ -> InvalidStateTransition "Loan" |> fail
 
 let init = LoanInit

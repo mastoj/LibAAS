@@ -2,12 +2,10 @@
 open System
 open LibASS.Contracts
 open LibASS.Tests.Specification
+open LibASS.Tests.TestHelpers
 open Xunit
 
 module ``When loaning an item`` =
-    let newGuid() = Guid.NewGuid()
-    let newAggId() = AggregateId (newGuid())
-
     [<Fact>]
     let ``the loan should be created and due date set`` () =
         let loanGuid = newGuid()

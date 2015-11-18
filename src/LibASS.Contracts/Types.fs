@@ -14,6 +14,12 @@ type Fine = Fine of int
 type LoanDate = LoanDate of DateTime
 type DueDate = DueDate of DateTime
 type ReturnDate = ReturnDate of DateTime
+type Quantity = internal Quantity of int
+    with 
+        static member Create x = 
+            if x >= 0 then Quantity x
+            else raise (exn "Invalid quantity")
+
 
 type Book = {Title: Title; Author: Author }
 type Movie = {Title: Title; Director: Director }
@@ -25,7 +31,8 @@ type ItemData =
 type Error = 
     | NotImplemented of string
     | VersionConflict of string
-    | InvalidState
+    | InvalidStateTransition of string
+    | InvalidState of string
 
 type Item = ItemId*ItemData
 

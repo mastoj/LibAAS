@@ -55,6 +55,8 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Specification.fs" />
+    <Compile Include="TestHelpers.fs" />
+    <Compile Include="InventoryTests.fs" />
     <Compile Include="LoanTests.fs" />
     <Content Include="packages.config" />
     <Content Include="app.config" />

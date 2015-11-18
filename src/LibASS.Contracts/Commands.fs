@@ -7,7 +7,7 @@ type CommandData =
     | LoanItem of LoanId * UserId * ItemId * LibraryId
     | ReturnItem of ReturnItem
     | PayFine of PayFine
-    | RegisterInventoryItem of Item
+    | RegisterInventoryItem of Item * Quantity
 
 type Command = AggregateId * CommandData
 
