@@ -19,7 +19,7 @@ let main argv =
     let aggId = AggregateId (Guid.NewGuid())
 
     let result = (aggId, commandData) |> executer
-    let returnResult = (aggId, ReturnItem { LoanId = loanId}) |> executer
+    let returnResult = (aggId, ReturnItem loanId) |> executer
     printfn "Result: %A" result
     printfn "Return result: %A" returnResult
 

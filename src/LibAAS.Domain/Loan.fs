@@ -30,10 +30,10 @@ let handleAtInit dependencies ((aggId:AggregateId), commandData) =
 let handleAtCreated data ((aggId:AggregateId), commandData) =
     match commandData with
     | ReturnItem cData -> 
-        let now = DateTime.Now
+        let now = DateTime.Today
         let (DueDate duedate) = data.DueDate
         let daysLate = (now - duedate).Days
-        let fine = 10 * daysLate
+        let fine = 100 * daysLate
         if now > duedate then 
             [ItemLate (data.Loan, ReturnDate now, daysLate, Fine fine )] |> ok
         else 
