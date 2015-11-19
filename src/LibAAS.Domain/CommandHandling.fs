@@ -16,7 +16,7 @@ let (|LoanCommand|InventoryCommand|) command =
     | PayFine _ -> LoanCommand
     | RegisterInventoryItem _ -> InventoryCommand
 
-let getCommandHandler dependencies commandData =
+let commandRouteBuilder dependencies commandData =
     match commandData with
     | LoanCommand -> 
         (buildState Loan.evolveOne Loan.init)
@@ -28,7 +28,7 @@ let getCommandHandler dependencies commandData =
 let executeCommand dependencies (aggregateId, currentVersion, events, command) =
     let (aggId, commandData) = command
     (aggregateId, currentVersion, events, command)
-    |> getCommandHandler dependencies commandData
+    |> commandRouteBuilder dependencies commandData
     >>= (fun es -> (aggregateId, currentVersion, es, command) |> ok)
 
 let getEvents eventStore command = 

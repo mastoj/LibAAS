@@ -8,6 +8,11 @@ open System
 [<EntryPoint>]
 let main argv = 
     let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
+
+    let logSubscriber = printfn "%A"
+
+    eventStore
+
     let dependencies = 
         { GetItem = (fun _ -> "Not implemented in program" |> NotImplemented |> fail)}
 
