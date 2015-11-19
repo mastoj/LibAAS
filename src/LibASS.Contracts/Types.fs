@@ -33,10 +33,11 @@ type Error =
     | VersionConflict of string
     | InvalidStateTransition of string
     | InvalidState of string
+    | InvalidItem
 
 type Item = ItemId*ItemData
 
-type Loan = { LoanId: LoanId; UserId: UserId; Item: Item; LibraryId: LibraryId }
+type Loan = { LoanId: LoanId; UserId: UserId; ItemId: ItemId; LibraryId: LibraryId }
 
 type Version = int
 

@@ -1,5 +1,5 @@
 ﻿[<AutoOpen>]
-module CommandHandling
+module LibASS.Domain.CommandHandling
 open LibASS.Contracts
 
 let validateCommand command = command |> ok
@@ -16,19 +16,19 @@ let (|LoanCommand|InventoryCommand|) command =
     | PayFine _ -> LoanCommand
     | RegisterInventoryItem _ -> InventoryCommand
 
-let getCommandHandler commandData =
+let getCommandHandler dependencies commandData =
     match commandData with
     | LoanCommand -> 
         (buildState Loan.evolveOne Loan.init)
-        >=> (fun (_,_,s,command) -> Loan.executeCommand s command)
+        >=> (fun (_,_,s,command) -> Loan.executeCommand s dependencies command)
     | InventoryCommand ->
         (buildState Inventory.evolveOne Inventory.init)
         >=> (fun (_,_,s,command) -> Inventory.executeCommand s command)
 
-let executeCommand (aggregateId, currentVersion, events, command) =
+let executeCommand dependencies (aggregateId, currentVersion, events, command) =
     let (aggId, commandData) = command
     (aggregateId, currentVersion, events, command)
-    |> getCommandHandler commandData
+    |> getCommandHandler dependencies commandData
     >>= (fun es -> (aggregateId, currentVersion, es, command) |> ok)
 
 let getEvents eventStore command = 
@@ -39,9 +39,9 @@ let getEvents eventStore command =
 let saveEvents eventStore (AggregateId aggregateId, expectedVersion, events, command) = 
     eventStore.SaveEvents (StreamId aggregateId) (StreamVersion expectedVersion) events
 
-let execute eventStore command = 
+let execute eventStore dependencies command = 
     command 
     |> validateCommand
     >>= getEvents eventStore
-    >>= executeCommand
+    >>= executeCommand dependencies
     >>= saveEvents eventStore

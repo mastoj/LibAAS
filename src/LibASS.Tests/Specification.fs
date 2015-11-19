@@ -1,15 +1,28 @@
 ﻿[<AutoOpen>]
 module LibASS.Tests.Specification
 open LibASS.Contracts
+open LibASS.Domain.CommandHandling
+open LibASS.Domain.Integration
 open EventStore
 open Swensen.Unquote
 
+type Precondition = 
+    { presets: Events list
+      dependencies: (Dependencies -> Dependencies) }
+
 type Specification = 
-    {
-        PreCondition: Events list
-        Command: Command option
-        PostCondition: (Result<EventData list, Error>) option
-    }
+    { PreCondition:Precondition
+      Command: Command option
+      PostCondition: (Result<EventData list, Error>) option }
+
+let notImplemented = fun _ -> "Dependency not set for test" |> NotImplemented |> fail
+
+let defaultDependencies = 
+    { GetItem = notImplemented }
+
+let defaultPreconditions = 
+    { presets = []
+      dependencies = (fun x -> x)}
 
 let Given preCondition = 
     { PreCondition = preCondition 
@@ -21,14 +34,15 @@ let When command spec = {spec with Command = Some command}
 let Then (postCondition: Result<EventData list, Error>) spec =
     let finalSpec = {spec with PostCondition = Some postCondition}
     let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Invalid version when saving")
-    let executer = CommandHandling.execute eventStore
+    let dependencies = spec.PreCondition.dependencies defaultDependencies
+    let executer = execute eventStore dependencies
 
     let savePreConditions preCondition = 
         preCondition 
         |> List.iter (fun (AggregateId aggId, events) -> 
                             eventStore.SaveEvents (StreamId aggId) (StreamVersion 0) events |> ignore)
 
-    finalSpec.PreCondition |> savePreConditions
+    finalSpec.PreCondition.presets |> savePreConditions
     let actual = finalSpec.Command |> Option.get |> executer
     let expected = finalSpec.PostCondition |> Option.get
 

@@ -1,5 +1,6 @@
-﻿module Loan
+﻿module LibASS.Domain.Loan
 open LibASS.Contracts
+open LibASS.Domain.Integration
 open System
 
 type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}
@@ -10,17 +11,20 @@ type LoanState =
     | Returned of LoanData * ReturnDate
     | LoanInit
 
-let handleAtInit ((aggId:AggregateId), commandData) = 
+let handleAtInit dependencies ((aggId:AggregateId), commandData) = 
     match commandData with
     | LoanItem (loanId, userId, itemId, libraryId) -> 
-        let i = itemId,(Book { Title = Title "A book"; Author = Author "A author"})
-        let loan = 
-            { LoanId = loanId
-              UserId = userId
-              Item = i
-              LibraryId = libraryId }
-        let now = DateTime.Today
-        [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
+        dependencies.GetItem itemId
+        >>= 
+            fun _ ->
+                let item = itemId,(Book { Title = Title "A book"; Author = Author "A author"})
+                let loan = 
+                    { LoanId = loanId
+                      UserId = userId
+                      ItemId = itemId
+                      LibraryId = libraryId }
+                let now = DateTime.Today
+                [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
     | _ -> InvalidState "Loan at init" |> fail
 
 let handleAtCreated data ((aggId:AggregateId), commandData) =
@@ -36,9 +40,9 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
             [ItemReturned (data.Loan, ReturnDate now )] |> ok
     | _ -> InvalidState "Loan at created" |> fail
 
-let executeCommand state command =
+let executeCommand  state dependencies command =
     match state with
-    | LoanInit -> handleAtInit command
+    | LoanInit -> handleAtInit dependencies command
     | LoanCreated data -> command |> handleAtCreated data
     | _ -> InvalidState "Loan" |> fail
 

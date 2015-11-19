@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Integration.fs" />
     <Compile Include="Inventory.fs" />
     <Compile Include="Loan.fs" />
     <Compile Include="CommandHandling.fs" />
