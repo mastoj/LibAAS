@@ -9,12 +9,35 @@ open System
 let main argv = 
     let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
 
-    let logSubscriber = printfn "%A"
+    let logSubscriber e = 
+        printfn "Hey ho! Lets go!"
+        printfn "%A" e
+        printfn "We went!"
 
-    eventStore
+    eventStore.AddSubscriber "logsub" logSubscriber
+
+    let newGuid() = Guid.NewGuid()
+    let newAggId() = AggregateId (newGuid())
+
+
+//    let createLoanTestData() = 
+    let loanGuid = newGuid()
+    let userId = UserId (newGuid())
+    let itemId = ItemId (newGuid())
+    let libraryId = LibraryId (newGuid())
+    let aggId = AggregateId loanGuid
+    let loan = { LoanId = LoanId loanGuid
+                 UserId = userId
+                 ItemId = itemId
+                 LibraryId = libraryId }
+
+    let item = ( loan.ItemId,
+                 Book 
+                    { Title = Title "A book"
+                      Author = Author "A author"})
 
     let dependencies = 
-        { GetItem = (fun _ -> "Not implemented in program" |> NotImplemented |> fail)}
+        { GetItem = (fun _ -> item |> ok )}
 
     let executer = execute eventStore dependencies
 
@@ -25,8 +48,6 @@ let main argv =
 
     let result = (aggId, commandData) |> executer
     let returnResult = (aggId, ReturnItem loanId) |> executer
-    printfn "Result: %A" result
-    printfn "Return result: %A" returnResult
 
     Console.ReadLine() |> ignore
     0 // return an integer exit code
