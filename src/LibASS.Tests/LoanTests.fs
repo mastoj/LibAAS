@@ -2,7 +2,7 @@
 open System
 open LibASS.Contracts
 open LibASS.Domain
-open LibASS.Domain.Integration
+open LibASS.Domain.Types
 open LibASS.Tests.Specification
 open LibASS.Tests.TestHelpers
 open Xunit
@@ -33,7 +33,7 @@ module ``When loaning an item`` =
                         { Title = Title "A book"
                           Author = Author "A author"})
 
-        let getItem _ = item |> ok
+        let getItem _ = NotImplemented "DELETE ME" |> fail
         let dependenciesBuilder d = {d with GetItem = getItem}
 
         Given {defaultPreconditions with dependencies = dependenciesBuilder }

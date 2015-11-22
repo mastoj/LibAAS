@@ -1,6 +1,6 @@
 ﻿module LibASS.Domain.Loan
 open LibASS.Contracts
-open LibASS.Domain.Integration
+open LibASS.Domain.Types
 open System
 
 type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}

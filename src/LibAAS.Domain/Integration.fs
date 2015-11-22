@@ -1,8 +1,19 @@
-﻿module LibASS.Domain.Integration
+﻿module LibASS.Domain.Types
 
 open LibASS.Contracts
 
-type Dependencies = 
+type InventoryState =
+    | InventoryInit
+    | InventorItemCreated of itemId:ItemId*itemData:ItemData*Quantity*Quantity
+
+type EvolveOne<'T> = EventData -> 'T -> Result<'T, Error>
+type EvolveSeed<'T> = 
     {
-        GetItem: ItemId -> Result<Item,Error>
+        Init: 'T
+        EvolveOne: EvolveOne<'T>
+    }
+
+type InternalDependencies = 
+    {
+        GetItem: ItemId -> Result<InventoryState,Error>
     }

@@ -2,7 +2,7 @@
 // See the 'F# Tutorial' project for more help.
 open LibASS.Contracts
 open LibASS.Domain.CommandHandling
-open LibASS.Domain.Integration
+open LibASS.Domain.Types
 open System
 
 [<EntryPoint>]
@@ -37,7 +37,7 @@ let main argv =
                       Author = Author "A author"})
 
     let dependencies = 
-        { GetItem = (fun _ -> item |> ok )}
+        { GetItem = (fun _ ->  NotImplemented "DELETE ME" |> fail )}
 
     let executer = execute eventStore dependencies
 

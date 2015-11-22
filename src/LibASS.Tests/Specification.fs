@@ -2,13 +2,13 @@
 module LibASS.Tests.Specification
 open LibASS.Contracts
 open LibASS.Domain.CommandHandling
-open LibASS.Domain.Integration
+open LibASS.Domain.Types
 open EventStore
 open Swensen.Unquote
 
 type Precondition = 
     { presets: Events list
-      dependencies: (Dependencies -> Dependencies) }
+      dependencies: (InternalDependencies -> InternalDependencies) }
 
 type Specification = 
     { PreCondition:Precondition
