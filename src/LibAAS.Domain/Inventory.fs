@@ -4,21 +4,24 @@ open LibASS.Contracts
 open LibASS.Domain.Types
 open System
 
-type InventoryState =
-    | InventoryInit
-
 let handleAtInit (id, command) = 
     match command with
-    | RegisterInventoryItem(item, quantity) -> [InventoryItemRegistered(item, quantity)] |> ok
+    | RegisterInventoryItem(item, quantity) -> [ItemRegistered(item, quantity)] |> ok
     | _ -> InvalidState "Inventory at init" |> fail
 
 let executeCommand state command =
     match state with
-    | InventoryInit -> handleAtInit command
+    | ItemInit -> handleAtInit command
     | _ -> InvalidState "Inventory" |> fail
+
+let evolveAtInit = function
+    | ItemRegistered (item,quantity) ->
+        ItemInStock (item, quantity) |> ok
+    | _ -> InvalidStateTransition "Item at init" |> fail
 
 let evolveOne (event:EventData) state = 
     match state with
+    | ItemInit -> evolveAtInit event
     | _ -> InvalidStateTransition "Inventory" |> fail
 
-let evolveSeed = {Init = InventoryInit; EvolveOne = evolveOne}
+let evolveSeed = {Init = ItemInit; EvolveOne = evolveOne}

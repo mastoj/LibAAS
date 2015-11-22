@@ -3,28 +3,22 @@ open LibASS.Contracts
 open LibASS.Domain.Types
 open System
 
-type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}
-type LoanState = 
-    | LoanCreated of LoanData
-    | LateReturn of LoanData * Fine * ReturnDate
-    | LoanPaid of LoanData * Fine
-    | Returned of LoanData * ReturnDate
-    | LoanInit
-
-let handleAtInit dependencies ((aggId:AggregateId), commandData) = 
+let handleAtInit stateGetters ((aggId:AggregateId), commandData) = 
     match commandData with
     | LoanItem (loanId, userId, itemId, libraryId) -> 
-        dependencies.GetItem itemId
-        >>= 
-            fun _ ->
-                let item = itemId,(Book { Title = Title "A book"; Author = Author "A author"})
-                let loan = 
-                    { LoanId = loanId
-                      UserId = userId
-                      ItemId = itemId
-                      LibraryId = libraryId }
-                let now = DateTime.Today
-                [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
+        stateGetters.GetInventoryItem itemId
+        >>=
+            fun item ->
+                match item with
+                | ItemInit -> InvalidItem |> fail
+                | _ ->
+                    let loan = 
+                        { LoanId = loanId
+                          UserId = userId
+                          ItemId = itemId
+                          LibraryId = libraryId }
+                    let now = DateTime.Today
+                    [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok
     | _ -> InvalidState "Loan at init" |> fail
 
 let handleAtCreated data ((aggId:AggregateId), commandData) =
@@ -40,9 +34,9 @@ let handleAtCreated data ((aggId:AggregateId), commandData) =
             [ItemReturned (data.Loan, ReturnDate now )] |> ok
     | _ -> InvalidState "Loan at created" |> fail
 
-let executeCommand  state dependencies command =
+let executeCommand  state stateGetters command =
     match state with
-    | LoanInit -> handleAtInit dependencies command
+    | LoanInit -> handleAtInit stateGetters command
     | LoanCreated data -> command |> handleAtCreated data
     | _ -> InvalidState "Loan" |> fail
 

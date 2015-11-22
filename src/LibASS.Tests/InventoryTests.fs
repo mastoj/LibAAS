@@ -18,7 +18,7 @@ module ``When add an item to the inventory`` =
 
         Given defaultPreconditions
         |> When (aggId, RegisterInventoryItem (item, qty))
-        |> Then ([InventoryItemRegistered(item, qty)] |> ok)
+        |> Then ([ItemRegistered(item, qty)] |> ok)
 
     [<Fact>]
     let ``The item should not be added if the id is not unique``() =
@@ -32,6 +32,6 @@ module ``When add an item to the inventory`` =
         Given {
             defaultPreconditions 
                 with 
-                presets = [aggId, [InventoryItemRegistered(item, qty)]] }
+                presets = [aggId, [ItemRegistered(item, qty)]] }
         |> When (aggId, RegisterInventoryItem (item, qty))
-        |> Then (InvalidStateTransition "Inventory" |> fail)
+        |> Then (InvalidState "Inventory" |> fail)

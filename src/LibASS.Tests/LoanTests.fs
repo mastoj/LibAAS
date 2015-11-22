@@ -39,7 +39,7 @@ module ``When loaning an item`` =
 
         Given {defaultPreconditions 
                 with 
-                    presets = [itemAggId, [InventoryItemRegistered(item, qty)]]}
+                    presets = [itemAggId, [ItemRegistered(item, qty)]]}
         |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
         |> Then ([ItemLoaned 
                     ( loan,
@@ -50,10 +50,7 @@ module ``When loaning an item`` =
     let ``the user shoul be notified if item doesn't exist``() = 
         let aggId,loan = createLoanTestData()
 
-        let getItem _ = InvalidItem |> fail
-        let dependenciesBuilder d = {d with GetItem = getItem}
-
-        Given {defaultPreconditions with dependencies = dependenciesBuilder }
+        Given defaultPreconditions
         |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
         |> Then (InvalidItem |> fail)
 
