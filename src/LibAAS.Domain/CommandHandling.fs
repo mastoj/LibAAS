@@ -1,12 +1,13 @@
 ﻿[<AutoOpen>]
 module LibASS.Domain.CommandHandling
 open LibASS.Contracts
+open LibASS.Domain.Types
 
 let validateCommand command = command |> ok
 
-let buildState evolveOne init (aggregateId, version, events, command) =
-    let evolver res e = bind (evolveOne e) res
-    let state = events |> List.fold evolver (init |> ok)
+let buildState evolveSeed (aggregateId, version, events, command) =
+    let evolver res e = bind (evolveSeed.EvolveOne e) res
+    let state = events |> List.fold evolver (evolveSeed.Init |> ok)
     state >>= (fun s -> (aggregateId, version, s, command) |> ok)
 
 let (|LoanCommand|InventoryCommand|) command =
@@ -19,10 +20,10 @@ let (|LoanCommand|InventoryCommand|) command =
 let commandRouteBuilder dependencies commandData =
     match commandData with
     | LoanCommand -> 
-        (buildState Loan.evolveOne Loan.init)
+        (buildState Loan.evolveSeed)
         >=> (fun (_,_,s,command) -> Loan.executeCommand s dependencies command)
     | InventoryCommand ->
-        (buildState Inventory.evolveOne Inventory.init)
+        (buildState Inventory.evolveSeed)
         >=> (fun (_,_,s,command) -> Inventory.executeCommand s command)
 
 let executeCommand dependencies (aggregateId, currentVersion, events, command) =

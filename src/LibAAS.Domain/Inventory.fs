@@ -1,6 +1,7 @@
-﻿module Inventory
+﻿module LibASS.Domain.Inventory
 
 open LibASS.Contracts
+open LibASS.Domain.Types
 open System
 
 type InventoryState =
@@ -20,4 +21,4 @@ let evolveOne (event:EventData) state =
     match state with
     | _ -> InvalidStateTransition "Inventory" |> fail
 
-let init = InventoryInit
+let evolveSeed = {Init = InventoryInit; EvolveOne = evolveOne}

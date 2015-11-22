@@ -62,4 +62,4 @@ let evolveOne (event:EventData) state =
     | LoanCreated data -> event |> evolveAtCreated data
     | _ -> InvalidStateTransition "Loan" |> fail
 
-let init = LoanInit
+let evolveSeed = {Init = LoanInit; EvolveOne = evolveOne}

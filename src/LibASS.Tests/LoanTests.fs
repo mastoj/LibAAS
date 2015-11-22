@@ -33,10 +33,13 @@ module ``When loaning an item`` =
                         { Title = Title "A book"
                           Author = Author "A author"})
 
-        let getItem _ = NotImplemented "DELETE ME" |> fail
-        let dependenciesBuilder d = {d with GetItem = getItem}
+        let qty = Quantity.Create 10
+        let (ItemId id) = loan.ItemId
+        let itemAggId = AggregateId id
 
-        Given {defaultPreconditions with dependencies = dependenciesBuilder }
+        Given {defaultPreconditions 
+                with 
+                    presets = [itemAggId, [InventoryItemRegistered(item, qty)]]}
         |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
         |> Then ([ItemLoaned 
                     ( loan,
