@@ -1,4 +1,4 @@
-﻿module LibASS.Domain.Inventory
+﻿module internal LibASS.Domain.Inventory
 
 open LibASS.Contracts
 open LibASS.Domain.Types

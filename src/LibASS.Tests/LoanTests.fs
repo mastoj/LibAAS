@@ -2,7 +2,6 @@
 open System
 open LibASS.Contracts
 open LibASS.Domain
-open LibASS.Domain.Types
 open LibASS.Tests.Specification
 open LibASS.Tests.TestHelpers
 open Xunit

@@ -1,4 +1,4 @@
-﻿module LibASS.Domain.Types
+﻿module internal LibASS.Domain.Types
 
 open LibASS.Contracts
 

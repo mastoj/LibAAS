@@ -1,14 +1,12 @@
 ﻿[<AutoOpen>]
 module LibASS.Tests.Specification
 open LibASS.Contracts
-open LibASS.Domain.CommandHandling
-open LibASS.Domain.Types
+open LibASS.Domain.Entrypoint
 open EventStore
 open Swensen.Unquote
 
 type Precondition = 
-    { presets: Events list
-      dependencies: (InternalDependencies -> InternalDependencies) }
+    { presets: Events list }
 
 type Specification = 
     { PreCondition:Precondition
@@ -17,12 +15,8 @@ type Specification =
 
 let notImplemented = fun _ -> "Dependency not set for test" |> NotImplemented |> fail
 
-let defaultDependencies = 
-    { GetItem = notImplemented }
-
 let defaultPreconditions = 
-    { presets = []
-      dependencies = (fun x -> x)}
+    { presets = [] }
 
 let Given preCondition = 
     { PreCondition = preCondition 
@@ -34,8 +28,7 @@ let When command spec = {spec with Command = Some command}
 let Then (postCondition: Result<EventData list, Error>) spec =
     let finalSpec = {spec with PostCondition = Some postCondition}
     let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Invalid version when saving")
-    let dependencies = spec.PreCondition.dependencies defaultDependencies
-    let executer = execute eventStore dependencies
+    let executer = execute eventStore
 
     let savePreConditions preCondition = 
         preCondition 

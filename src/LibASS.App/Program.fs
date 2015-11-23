@@ -1,8 +1,7 @@
 ﻿// Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
 open LibASS.Contracts
-open LibASS.Domain.CommandHandling
-open LibASS.Domain.Types
+open LibASS.Domain.Entrypoint
 open System
 
 [<EntryPoint>]
@@ -36,10 +35,7 @@ let main argv =
                     { Title = Title "A book"
                       Author = Author "A author"})
 
-    let dependencies = 
-        { GetItem = (fun _ ->  NotImplemented "DELETE ME" |> fail )}
-
-    let executer = execute eventStore dependencies
+    let executer = execute eventStore
 
     let newGuid() = Guid.NewGuid()
     let loanId = LoanId (newGuid())

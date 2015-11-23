@@ -1,4 +1,4 @@
-﻿module LibASS.Domain.Loan
+﻿module internal LibASS.Domain.Loan
 open LibASS.Contracts
 open LibASS.Domain.Types
 open System
