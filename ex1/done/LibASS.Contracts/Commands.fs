@@ -4,7 +4,7 @@ module LibASS.Contracts.Commands
 type CommandData = 
     | LoanItem
     | ReturnItem
-    | RegisterInventoryItem
+    | RegisterInventoryItem of Item * Quantity
 
 type Command = AggregateId * CommandData
 

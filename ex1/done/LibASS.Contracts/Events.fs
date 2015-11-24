@@ -2,6 +2,7 @@
 module LibASS.Contracts.Events
 open System
 
-type EventData = int
+type EventData = 
+    | ItemRegistered of item:Item * Quantity:Quantity
 
 type Events = AggregateId * EventData list
