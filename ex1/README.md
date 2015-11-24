@@ -9,7 +9,7 @@ The purpose of exercise 1 is to add the functionality to register items in the l
 Open `InventoryTests.fs` in the test project and add the following body to the function `the item should be added`.
 
 
-```
+```fsharp
 let itemIntId = newRandomInt()
 let aggId = AggregateId itemIntId
 let itemId = ItemId itemIntId
@@ -32,7 +32,7 @@ The first part to get the test green is to make it compile, så let's add all th
 
 To the `Types` module (`Types.fs`) add the following lines:
 
-```
+```fsharp
 type Title = Title of string
 type Author = Author of string
 type Book = {Title: Title; Author: Author }
@@ -50,13 +50,13 @@ We use single discriminated union for `Title`, `Author` and `Quantity`, this wil
 
 After we have the basic type we can add the command to the `Commands` module in the `Contracts` project. Replace the `RegisterInventoryItem` with the following
 
-```
+```fsharp
 | RegisterInventoryItem of Item * Quantity
 ```
 
 The last type we need to add is the event used in the test. So add that to the `Events` module. The `EventData` definition should look like this when done:
 
-```
+```fsharp
 type EventData =
     | ItemRegistered of item:Item * Quantity:Quantity
 ```
@@ -71,7 +71,7 @@ In the `Inventory` module we have skeleton implementation of what we need. The m
 
 If you add a break point in the `executeCommand` function you'll see that the `State` is `ItemInit`. That state is defined in `DomainTypes`, and is the state we are interested in right now since nothing has happened and the `Item` should be in its initial stage. To get the test green we need to handle the command, and to address that you need to change the implementation to this:
 
-```
+```fsharp
 let handleAtInit (id, command) =
     match command with
     | RegisterInventoryItem(item, quantity) -> [ItemRegistered(item, quantity)] |> ok
