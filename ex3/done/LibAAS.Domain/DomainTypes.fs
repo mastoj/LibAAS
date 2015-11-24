@@ -1,4 +1,4 @@
-﻿module internal LibASS.Domain.Types
+﻿module internal LibASS.Domain.DomainTypes
 
 open LibASS.Contracts
 
@@ -6,12 +6,7 @@ type InventoryState =
     | ItemInit
     | ItemInStock of item:Item*quantity:Quantity
 
-type LoanData = {Loan: Loan; LoanDate: LoanDate; DueDate: DueDate}
 type LoanState = 
-    | LoanCreated of LoanData
-    | LateReturn of LoanData * Fine * ReturnDate
-    | LoanPaid of LoanData * Fine
-    | Returned of LoanData * ReturnDate
     | LoanInit
 
 type EvolveOne<'T> = EventData -> 'T -> Result<'T, Error>
@@ -28,7 +23,6 @@ type InternalDependencies =
 
 type StateGetters = 
     {
-        GetLoan: LoanId -> Result<LoanState, Error>
         GetInventoryItem: ItemId -> Result<InventoryState, Error>
     }
 

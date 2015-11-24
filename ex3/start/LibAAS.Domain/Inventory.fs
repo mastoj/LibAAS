@@ -1,13 +1,13 @@
 ﻿module internal LibASS.Domain.Inventory
 
 open LibASS.Contracts
-open LibASS.Domain.Types
+open LibASS.Domain.DomainTypes
 open System
 
 let handleAtInit (id, command) = 
     match command with
     | RegisterInventoryItem(item, quantity) -> [ItemRegistered(item, quantity)] |> ok
-    | _ -> InvalidState "Inventory at init" |> fail
+    | _ -> raise (exn "Implement me")
 
 let executeCommand state command =
     match state with
@@ -15,13 +15,10 @@ let executeCommand state command =
     | _ -> InvalidState "Inventory" |> fail
 
 let evolveAtInit = function
-    | ItemRegistered (item,quantity) ->
-        ItemInStock (item, quantity) |> ok
-    | _ -> InvalidStateTransition "Item at init" |> fail
+    | ItemRegistered(item, quantity) -> ItemInStock (item, quantity) |> ok
 
 let evolveOne (event:EventData) state = 
     match state with
     | ItemInit -> evolveAtInit event
-    | _ -> InvalidStateTransition "Inventory" |> fail
 
 let evolveSeed = {Init = ItemInit; EvolveOne = evolveOne}
