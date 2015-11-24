@@ -7,6 +7,8 @@ The language in the application is F#, mainly because event sourcing is function
 
 The fictive domain that will be used is library as a service, where you will be able to register items as well as loan them. It shouldn't be that hard to implement more features, but that is enough for this sample tutorial.
 
+You can go straight to [exercise 1](ex1/README.md) or read some background things information first.
+
 ## CQRS + event sourcing, the short explanation
 
 CQRS stands for Command Query Responsibility Segregation, what it means is that you separate your reads from your writes. You don't have to use event sourcing to do so, but it is a good fit.

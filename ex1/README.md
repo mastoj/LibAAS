@@ -83,4 +83,4 @@ let executeCommand state command =
     | _ -> raise (exn "Implement me")
 ```
 
-Now we have our first function working and that finishes of exercise 1.
+Now we have our first function working and that finishes of exercise 1. And you can go on to [Exercise 2](../ex2/README.md).
