@@ -3,10 +3,11 @@
 open LibASS.Contracts
 open LibASS.Domain.DomainEntry
 open System
+open LibASS.AppBuilder
 
 [<EntryPoint>]
 let main argv = 
-    let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
+    let (eventStore,app) = createApp()
 
     let logSubscriber e = 
         printfn "Hey ho! Lets go!"
@@ -35,7 +36,6 @@ let main argv =
 //                    { Title = Title "A book"
 //                      Author = Author "A author"})
 //
-//    let executer = execute eventStore
 //
 //    let newGuid() = Guid.NewGuid()
 //    let loanId = LoanId (newGuid())
