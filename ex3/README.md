@@ -58,13 +58,13 @@ let ``the loan should be created and due date set``() =
                   LoanDate System.DateTime.Today,
                   DueDate (System.DateTime.Today.AddDays(7.)))] |> ok)
 
-  [<Fact>]
-  let ``the user shoul be notified if item doesn't exist``() =
-      let aggId,loan = createLoanTestData()
-
-      Given defaultPreconditions
-      |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
-      |> Then (InvalidItem |> fail)
+[<Fact>]
+let ``the user shoul be notified if item doesn't exist``() =
+    let aggId,loan = createLoanTestData()
+    
+    Given defaultPreconditions
+    |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+    |> Then (InvalidItem |> fail)
   ```
 
 Again, it doesn't compile since we are missing the command and event definitions as well as the type for `LoanDate` and `DueDate`.
