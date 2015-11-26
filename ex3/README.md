@@ -111,7 +111,7 @@ let executeCommand state stateGetters command =
     | _ -> InvalidState "Loan" |> fail
 ```
 
-Some points about the code above that might look strange. The operator `>=>` is not magic, it is a custom function that glues to other functions together. It is defined in `[ErrorHandling.fs](start/LibASS.Infrastructure/ErrorHandling.fs)`. We need to use that one instead of the standard operator `>>` since we are using the wrapper type `Result`. There is also this `stateGetters` argument. That is a variable that holds a function to get items from the inventory, it is defined in `[CommandHandling.fs](start/LibASS.Domain/)`. Please ask if you're curious about the details.
+Some points about the code above that might look strange. The operator `>=>` is not magic, it is a custom function that glues to other functions together. It is defined in [`ErrorHandling.fs`](start/LibASS.Infrastructure/ErrorHandling.fs). We need to use that one instead of the standard operator `>>` since we are using the wrapper type `Result`. There is also this `stateGetters` argument. That is a variable that holds a function to get items from the inventory, it is defined in [`CommandHandling.fs`](start/LibASS.Domain/CommandHandling.fs). Please ask if you're curious about the details.
 
 The anonymous function
 
