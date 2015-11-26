@@ -1,4 +1,4 @@
-# LibASS
+# LibAAS
 Another sample project showing event sourcing in F#. Focus is on the concept and not F#.
 
 Start with ex1 and work your way through to get a better understanding of how it can be to work with an application based on CQRS and event sourcing.
