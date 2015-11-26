@@ -11,16 +11,16 @@ I'll give you the test as starting point this time as well.
 ```fsharp
 [<Fact>]
 let ``The item should not be added if the id is not unique``() =
-    let itemGuid = newGuid()
-    let aggId = AggregateId itemGuid
-    let itemId = ItemId itemGuid
+    let itemIntId = newRandomInt()
+    let aggId = AggregateId itemIntId
+    let itemId = ItemId itemIntId
     let book = Book {Title = Title "Magic Book"; Author = Author "JRR Tolkien"}
     let item = itemId,book
     let qty = Quantity.Create 10
 
     Given {
-        defaultPreconditions
-            with
+        defaultPreconditions 
+            with 
             presets = [aggId, [ItemRegistered(item, qty)]] }
     |> When (aggId, RegisterInventoryItem (item, qty))
     |> Then (InvalidState "Inventory" |> fail)
