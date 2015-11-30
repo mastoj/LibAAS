@@ -5,13 +5,13 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibAAS.Domain", "LibAAS.Domain\LibAAS.Domain.fsproj", "{21160132-ECF3-4E8C-A2E1-7C2C149F9EA8}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibASS.Tests", "LibASS.Tests\LibASS.Tests.fsproj", "{5A26C86F-D7DA-48E4-B078-77FBB76CB6D7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibAAS.Tests", "LibAAS.Tests\LibAAS.Tests.fsproj", "{5A26C86F-D7DA-48E4-B078-77FBB76CB6D7}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibASS.Infrastructure", "LibASS.Infrastructure\LibASS.Infrastructure.fsproj", "{E0012E26-9A9F-429B-A5F3-E13211C28CA2}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibAAS.Infrastructure", "LibAAS.Infrastructure\LibAAS.Infrastructure.fsproj", "{E0012E26-9A9F-429B-A5F3-E13211C28CA2}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibASS.App", "LibASS.App\LibASS.App.fsproj", "{9D09871E-2BB3-465F-A040-18C873D2AA13}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibAAS.App", "LibAAS.App\LibAAS.App.fsproj", "{9D09871E-2BB3-465F-A040-18C873D2AA13}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibASS.Contracts", "LibASS.Contracts\LibASS.Contracts.fsproj", "{5C38A911-DCDC-4381-98E9-9F6808788D4A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LibAAS.Contracts", "LibAAS.Contracts\LibAAS.Contracts.fsproj", "{5C38A911-DCDC-4381-98E9-9F6808788D4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

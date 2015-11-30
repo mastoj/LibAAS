@@ -1,5 +1,5 @@
-﻿module LibASS.Domain.DomainEntry
-open LibASS.Domain.CommandHandling
+﻿module LibAAS.Domain.DomainEntry
+open LibAAS.Domain.CommandHandling
 
 let execute eventStore command = 
     let stateGetters = createGetters eventStore

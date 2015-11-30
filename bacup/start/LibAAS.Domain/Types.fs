@@ -1,6 +1,6 @@
-﻿module internal LibASS.Domain.Types
+﻿module internal LibAAS.Domain.Types
 
-open LibASS.Contracts
+open LibAAS.Contracts
 
 type InventoryState =
     | ItemInit

@@ -1,6 +1,6 @@
-﻿module internal LibASS.Domain.CommandHandling
-open LibASS.Contracts
-open LibASS.Domain.DomainTypes
+﻿module internal LibAAS.Domain.CommandHandling
+open LibAAS.Contracts
+open LibAAS.Domain.DomainTypes
 
 let validateCommand command = command |> ok
 

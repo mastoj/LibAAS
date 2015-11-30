@@ -1,8 +1,8 @@
-﻿namespace LibASS.Domain
+﻿namespace LibAAS.Domain
 [<AutoOpen>]
 module internal CommandHandling = 
-    open LibASS.Contracts
-    open LibASS.Domain.Types
+    open LibAAS.Contracts
+    open LibAAS.Domain.Types
 
     let validateCommand command = command |> ok
 

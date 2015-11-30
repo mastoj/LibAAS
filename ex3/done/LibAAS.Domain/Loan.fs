@@ -1,6 +1,6 @@
-﻿module internal LibASS.Domain.Loan
-open LibASS.Contracts
-open LibASS.Domain.DomainTypes
+﻿module internal LibAAS.Domain.Loan
+open LibAAS.Contracts
+open LibAAS.Domain.DomainTypes
 open System
 
 let handleAtInit stateGetters ((aggId:AggregateId), commandData) = 

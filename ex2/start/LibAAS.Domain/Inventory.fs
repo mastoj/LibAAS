@@ -1,7 +1,7 @@
-﻿module internal LibASS.Domain.Inventory
+﻿module internal LibAAS.Domain.Inventory
 
-open LibASS.Contracts
-open LibASS.Domain.DomainTypes
+open LibAAS.Contracts
+open LibAAS.Domain.DomainTypes
 open System
 
 let handleAtInit (id, command) = 

@@ -19,8 +19,8 @@ let ``The item should not be added if the id is not unique``() =
     let qty = Quantity.Create 10
 
     Given {
-        defaultPreconditions 
-            with 
+        defaultPreconditions
+            with
             presets = [aggId, [ItemRegistered(item, qty)]] }
     |> When (aggId, RegisterInventoryItem (item, qty))
     |> Then (InvalidState "Inventory" |> fail)
@@ -28,7 +28,7 @@ let ``The item should not be added if the id is not unique``() =
 
 As you can see, this test is a little bit different. Instead of expecting a list of events, we expect `InvalidState "Inventory" |> fail`. The `fail` helper method creates a `Failure` value of type `Result` which we use to not have side effects in our functions. In regular C# programming you would most likely use an exception instead, but that is actually not a good way since that means your functions returns two different things, a return value or an exception. By using this wrapper type, we are certain that our result will always have the same type, `Result`. If you look at the previous test we piped the events to `ok` which creates a `Success` value of type `Result`.
 
-The definition of the `Result` type and some helper functions for it can be found [here](start/LibASS.Infrastructure/ErrorHandling.fs).
+The definition of the `Result` type and some helper functions for it can be found [here](start/LibAAS.Infrastructure/ErrorHandling.fs).
 
 Everything compiles, that is because I've already added the `InvalidState` type, check if you can find it. Since we don't need any new types we can go straight to the implementation.
 
