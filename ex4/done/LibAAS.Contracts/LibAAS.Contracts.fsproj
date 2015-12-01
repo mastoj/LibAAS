@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>LibAAS.Contracts</RootNamespace>
     <AssemblyName>LibAAS.Contracts</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Name>LibAAS.Contracts</Name>
