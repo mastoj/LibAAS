@@ -11,7 +11,7 @@ let createBuildAndTest proj version =
       let sln = !! (basePath </> "*.sln")
       trace (sprintf "Will build solution: %A" sln)
       sln
-      |> MSBuildDebug "" "Rebuild"
+      |> MSBuildRelease "" "Rebuild"
       |> ignore
 
   let test() =     
@@ -47,6 +47,7 @@ Target "Default" (fun _ ->
 // Target "Ex4Done" (createBuildAndTest "ex4" "done")
 
 let targetName = getBuildParam "target"
+trace (sprintf "Target name: %s" targetName)
 let (proj,version) = (targetName.Substring(0,3), targetName.Substring(3))
 let basePath = sprintf "./%s/%s" proj version
 
@@ -71,7 +72,7 @@ Target "Build" (fun _ ->
 Target "Test" (fun _ ->
   let testDlls = !!(basePath </> "*.Tests/bin/Debug/*.Tests.dll")
   testDlls 
-  |> xUnit2 (fun p -> { p with HtmlOutputPath = Some (testDir @@ "xunit.html") })
+  |> xUnit2 (fun p -> p)
 )
 
 "RestorePackages"
