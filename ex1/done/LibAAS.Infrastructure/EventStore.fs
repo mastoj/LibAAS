@@ -61,7 +61,7 @@ type EventStore<'TEvent, 'TError> =
         RemoveSubscriber: string -> unit
     }
 
-let inline createEventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents = 
+let createEventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents = 
     Agent.Start(eventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents)
 
 let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
