@@ -6,7 +6,7 @@ open System
 
 [<EntryPoint>]
 let main argv = 
-    let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
+    let eventStore = createInMemoryEventStore<EventData, Error> (Error.VersionConflict "Version conflict")
 
     let logSubscriber e = 
         printfn "Hey ho! Lets go!"

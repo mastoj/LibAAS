@@ -27,7 +27,7 @@ let When command spec = {spec with Command = Some command}
 
 let Then (postCondition: Result<EventData list, Error>) spec =
     let finalSpec = {spec with PostCondition = Some postCondition}
-    let eventStore = createEventStore<EventData, Error> (Error.VersionConflict "Invalid version when saving")
+    let eventStore = createInMemoryEventStore<EventData, Error> (Error.VersionConflict "Invalid version when saving")
     let executer = execute eventStore
 
     let savePreConditions preCondition = 

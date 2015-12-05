@@ -15,39 +15,35 @@ type Messages<'T> =
     | AddSubscriber of string * (StreamId * 'T list -> unit)
     | RemoveSubscriber of string
 
-let saveEvents state (id, expectedVersion, events, (replyChannel:AsyncReplyChannel<SaveResult>)) = 
-    match state |> Map.tryFind id with
-    | None -> 
-        replyChannel.Reply(Ok)
-        state |> Map.add id events
-    | Some existingEvents ->
-        let currentVersion = existingEvents |> List.length |> StreamVersion
-        match currentVersion = expectedVersion with
-        | true -> 
-            replyChannel.Reply(Ok)
-            state |> Map.add id (existingEvents@events)
-        | false -> 
-            replyChannel.Reply(VersionConflict)
-            state
+type internal EventStoreState<'TEvent,'THandler> = 
+    {
+        EventHandler: 'THandler
+        GetEvents: 'THandler -> StreamId -> ('TEvent list option * 'THandler) 
+        SaveEvents: 'THandler -> StreamId -> StreamVersion -> 'TEvent list -> (SaveResult * 'THandler)
+        Subscribers: Map<string, (StreamId * 'TEvent list -> unit)>
+    }
 
-type internal EventStoreState<'T> = {Events: Map<StreamId, 'T list>; Subscribers: Map<string, (StreamId * 'T list -> unit)>}
-let eventSourcingAgent<'T> (inbox:Agent<Messages<'T>>) = 
-    let initState = {Events = Map.empty; Subscribers = Map.empty}
+let eventSourcingAgent<'T, 'TEventHandler> (eventHandler:'TEventHandler) getEvents saveEvents (inbox:Agent<Messages<'T>>) = 
+    let initState = 
+        {
+            EventHandler = eventHandler
+            Subscribers = Map.empty
+            GetEvents = getEvents
+            SaveEvents = saveEvents
+        }
     let rec loop state = 
         async {
             let! msg = inbox.Receive()
             match msg with
             | GetEvents (id, replyChannel) ->
-                let events = state.Events |> Map.tryFind id
+                let (events, newHandler) = state.GetEvents state.EventHandler id
                 replyChannel.Reply(events)
-                return! loop state
+                return! loop {state with EventHandler = newHandler}
             | SaveEvents (id, expectedVersion, events, replyChannel) ->
-                let newEventMap = saveEvents state.Events (id, expectedVersion, events, replyChannel)
-                let newState = {state with Events = newEventMap}
-
-                state.Subscribers |> Map.iter (fun _ sub -> sub(id, events))
-
-                return! loop newState
+                let (result, newHandler) = state.SaveEvents state.EventHandler id expectedVersion events
+                if result = Ok then state.Subscribers |> Map.iter (fun _ sub -> sub(id, events)) else ()
+                replyChannel.Reply(result)
+                return! loop {state with EventHandler = newHandler}
             | AddSubscriber (subId, subFunction) ->
                 let newState = {state with Subscribers = (state.Subscribers |> Map.add subId subFunction)}
                 return! loop newState
@@ -64,10 +60,28 @@ type EventStore<'TEvent, 'TError> =
         AddSubscriber: string -> (StreamId * 'TEvent list -> unit) -> unit
         RemoveSubscriber: string -> unit
     }
-let createEventsourcingAgent<'T>() = Agent.Start(eventSourcingAgent<'T>)
 
-let createEventStore<'TEvent, 'TError> (versionError:'TError) =
-    let agent = createEventsourcingAgent<'TEvent>()
+let inline createEventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents = 
+    Agent.Start(eventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents)
+
+let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
+    let initState : Map<StreamId, 'TEvent list> = Map.empty
+
+    let saveEvents map id expectedVersion events = 
+        match map |> Map.tryFind id with
+        | None -> 
+            (Ok, map |> Map.add id events)
+        | Some existingEvents ->
+            let currentVersion = existingEvents |> List.length |> StreamVersion
+            match currentVersion = expectedVersion with
+            | true -> 
+                (Ok, map |> Map.add id (existingEvents@events))
+            | false -> 
+                (VersionConflict, map)
+
+    let getEvents map id = Map.tryFind id map, map
+
+    let agent = createEventSourcingAgent initState getEvents saveEvents
     let getEvents streamId = 
         let result = (fun r -> GetEvents (streamId, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
