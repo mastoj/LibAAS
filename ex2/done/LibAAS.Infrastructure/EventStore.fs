@@ -67,7 +67,7 @@ let createEventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents sav
 let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
     let initState : Map<StreamId, 'TEvent list> = Map.empty
 
-    let saveEvents map id expectedVersion events = 
+    let saveEventsInMap map id expectedVersion events = 
         match map |> Map.tryFind id with
         | None -> 
             (Ok, map |> Map.add id events)
@@ -79,9 +79,9 @@ let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
             | false -> 
                 (VersionConflict, map)
 
-    let getEvents map id = Map.tryFind id map, map
+    let getEventsInMap map id = Map.tryFind id map, map
 
-    let agent = createEventSourcingAgent initState getEvents saveEvents
+    let agent = createEventSourcingAgent initState getEventsInMap saveEventsInMap
     let getEvents streamId = 
         let result = (fun r -> GetEvents (streamId, r)) |> postAsyncReply agent |> Async.RunSynchronously
         match result with
