@@ -1,8 +1,13 @@
-﻿// Learn more about F# at http://fsharp.org. See the 'F# Tutorial' project
-// for more guidance on F# programming.
+﻿#load "AgentHelper.fs"
+#load "ErrorHandling.fs"
+#load "EventStore.fs"
 
-#load "Library1.fs"
-open LibAAS.Infrastructure
+open EventStore
 
-// Define your library scripting code here
+let inMemoryEventStore = createInMemoryEventStore<string,string> "This is a version error"
+inMemoryEventStore.AddSubscriber "FirstSubscriber" (printfn "%A")
+let res0 = inMemoryEventStore.SaveEvents (StreamId 1) (StreamVersion 0) ["Hello";"World"]
+let res1 = inMemoryEventStore.SaveEvents (StreamId 1) (StreamVersion 1) ["Hello2";"World2"]
+let res2 = inMemoryEventStore.SaveEvents (StreamId 1) (StreamVersion 2) ["Hello2";"World2"]
 
+[res0;res1;res2] |> List.mapi (fun i v -> printfn "%i: %A" i v)

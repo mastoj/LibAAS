@@ -1,4 +1,4 @@
-﻿#I "bin\\debug"
+﻿#I "bin/Debug"
 
 #r "LibAAS.Contracts"
 #r "LibAAS.Infrastructure"

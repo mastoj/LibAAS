@@ -23,7 +23,7 @@ type internal EventStoreState<'TEvent,'THandler> =
         Subscribers: Map<string, (StreamId * 'TEvent list -> unit)>
     }
 
-let eventSourcingAgent<'T, 'TEventHandler> (eventHandler:'TEventHandler) getEvents saveEvents (inbox:Agent<Messages<'T>>) = 
+let eventStoreAgent<'T, 'TEventHandler> (eventHandler:'TEventHandler) getEvents saveEvents (inbox:Agent<Messages<'T>>) = 
     let initState = 
         {
             EventHandler = eventHandler
@@ -53,6 +53,9 @@ let eventSourcingAgent<'T, 'TEventHandler> (eventHandler:'TEventHandler) getEven
         }
     loop initState
 
+let createEventStoreAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents = 
+    Agent.Start(eventStoreAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents)
+
 type EventStore<'TEvent, 'TError> = 
     {
         GetEvents: StreamId -> Result<StreamVersion*'TEvent list, 'TError>
@@ -61,8 +64,26 @@ type EventStore<'TEvent, 'TError> =
         RemoveSubscriber: string -> unit
     }
 
-let createEventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents = 
-    Agent.Start(eventSourcingAgent<'TEvent, 'TEventHandler> eventHandler getEvents saveEvents)
+let createEventStore<'TEvent, 'TError> (versionError:'TError) agent =
+    let getEvents streamId : Result<StreamVersion*'TEvent list, 'TError> = 
+        let result = (fun r -> GetEvents (streamId, r)) |> postAsyncReply agent |> Async.RunSynchronously
+        match result with
+        | Some events -> (StreamVersion (events |> List.length), events) |> ok
+        | None -> (StreamVersion 0, []) |> ok
+
+    let saveEvents streamId expectedVersion events : Result<'TEvent list, 'TError> = 
+        let result = (fun r -> SaveEvents(streamId, expectedVersion, events, r)) |> postAsyncReply agent |> Async.RunSynchronously
+        match result with
+        | Ok -> events |> ok
+        | VersionConflict -> versionError |> fail
+
+    let addSubscriber subId subscriber = 
+        (subId,subscriber) |> AddSubscriber |> post agent
+
+    let removeSubscriber subId = 
+        subId |> RemoveSubscriber |> post agent
+
+    { GetEvents = getEvents; SaveEvents = saveEvents; AddSubscriber = addSubscriber; RemoveSubscriber = removeSubscriber}
 
 let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
     let initState : Map<StreamId, 'TEvent list> = Map.empty
@@ -81,23 +102,5 @@ let createInMemoryEventStore<'TEvent, 'TError> (versionError:'TError) =
 
     let getEventsInMap map id = Map.tryFind id map, map
 
-    let agent = createEventSourcingAgent initState getEventsInMap saveEventsInMap
-    let getEvents streamId = 
-        let result = (fun r -> GetEvents (streamId, r)) |> postAsyncReply agent |> Async.RunSynchronously
-        match result with
-        | Some events -> (StreamVersion (events |> List.length), events) |> ok
-        | None -> (StreamVersion 0, []) |> ok
-
-    let saveEvents streamId expectedVersion events = 
-        let result = (fun r -> SaveEvents(streamId, expectedVersion, events, r)) |> postAsyncReply agent |> Async.RunSynchronously
-        match result with
-        | Ok -> events |> ok
-        | VersionConflict -> versionError |> fail
-
-    let addSubscriber subId subscriber = 
-        (subId,subscriber) |> AddSubscriber |> post agent
-
-    let removeSubscriber subId = 
-        subId |> RemoveSubscriber |> post agent
-
-    { GetEvents = getEvents; SaveEvents = saveEvents; AddSubscriber = addSubscriber; RemoveSubscriber = removeSubscriber}
+    let agent = createEventStoreAgent initState getEventsInMap saveEventsInMap
+    createEventStore<'TEvent, 'TError> versionError agent
