@@ -24,11 +24,11 @@ Given defaultPreconditions
 
 Of course the code doesn't compile, but we will come to that soon.
 
-As you can see, by using F# we can name or function in a way that make the tests much more readable. Also, the "framework" with `Given`, `When` and `Then` is something implemented in `Specification.fs` for you to look at if interested.
+As you can see, by using F# we can name our function in a way that make the tests much more readable. Also, the "framework" with `Given`, `When` and `Then` is something implemented in `Specification.fs` for you to look at if interested.
 
 ## Adding the relevant types
 
-The first part to get the test green is to make it compile, så let's add all the types. I try to separate between external and domain types. External types are types that the surrounding need to communicate with the domain and domain types are those that only the domain implementation needs to know about. External types are defined in the `Contracts` project.
+The first part to get the test green is to make it compile, so let's add all the types. I try to separate between external and domain types. External types are types that the surrounding  need to communicate with the domain and domain types are those that only the domain implementation needs to know about. External types are defined in the `Contracts` project.
 
 To the `Types` module (`Types.fs`) add the following lines:
 
@@ -67,7 +67,7 @@ Now everything should compile and we have a failing test, which mean we are read
 
 If you run the test you'll notice that you got some kind of `Exception` with the descriptive message `Implement me`. This happened in the `executeCommand` function in `Inventory` module, so let's go there and check.
 
-In the `Inventory` module we have skeleton implementation of what we need. The most important functions are, `evolveOne` and `executeCommand`, and these to functions will exist for each aggregate. The `evolveOne` function is the entry point for the function used when doing a `fold` over all the events. The `executeCommand` is the entry point for the action. At first we don't need to do anything with the `evolveOne` function since we don't have any events as a precondition, and that function is only called when events exists.
+In the `Inventory` module we have skeleton implementation of what we need. The most important functions are, `evolveOne` and `executeCommand`, and these two functions will exist for each aggregate. The `evolveOne` function is the entry point for the function used when doing a `fold` over all the events. The `executeCommand` is the entry point for the action. At first we don't need to do anything with the `evolveOne` function since we don't have any events as a precondition, and that function is only called when events exists.
 
 If you add a break point in the `executeCommand` function you'll see that the `State` is `ItemInit`. That state is defined in `DomainTypes`, and is the state we are interested in right now since nothing has happened and the `Item` should be in its initial stage. To get the test green we need to handle the command, and to address that you need to change the implementation to this:
 
