@@ -28,7 +28,7 @@ As you can see, by using F# we can name our function in a way that make the test
 
 ## Adding the relevant types
 
-The first part to get the test green is to make it compile, so let's add all the types. I try to separate between external and domain types. External types are types that the surrounding  need to communicate with the domain and domain types are those that only the domain implementation needs to know about. External types are defined in the `Contracts` project.
+The first part to get the test green is to make it compile, so let's add all the types. I try to separate between external and domain types. External types are types that the surrounding need to communicate with the domain and domain types are those that only the domain implementation needs to know about. External types are defined in the `Contracts` project.
 
 To the `Types` module (`Types.fs`) add the following lines:
 
