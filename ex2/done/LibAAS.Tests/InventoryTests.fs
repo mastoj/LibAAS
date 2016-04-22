@@ -17,7 +17,7 @@ module ``When add an item to the inventory`` =
         let qty = Quantity.Create 10
 
         Given defaultPreconditions
-        |> When (aggId, RegisterInventoryItem (item, qty))
+        |> When (aggId, RegisterInventoryItem { Item = item; Quantity =  qty })
         |> Then ([ItemRegistered(item, qty)] |> ok)
 
     [<Fact>]
@@ -33,5 +33,5 @@ module ``When add an item to the inventory`` =
             defaultPreconditions 
                 with 
                 presets = [aggId, [ItemRegistered(item, qty)]] }
-        |> When (aggId, RegisterInventoryItem (item, qty))
+        |> When (aggId, RegisterInventoryItem { Item = item; Quantity =  qty })
         |> Then (InvalidState "Inventory" |> fail)
