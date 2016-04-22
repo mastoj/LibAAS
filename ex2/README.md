@@ -22,7 +22,7 @@ let ``The item should not be added if the id is not unique``() =
         defaultPreconditions
             with
             presets = [aggId, [ItemRegistered(item, qty)]] }
-    |> When (aggId, RegisterInventoryItem (item, qty))
+    |> When (aggId, RegisterInventoryItem { Item = item; Quantity =  qty })
     |> Then (InvalidState "Inventory" |> fail)
 ```
 
@@ -40,8 +40,8 @@ Update the functions in the `Inventory` module so they look like this:
 
 ```fsharp
 let executeCommand state command =
-    match state with
-    | ItemInit -> handleAtInit command
+    match state, command with
+    | ItemInit, (id, RegisterInventoryItem cmd) -> handleAtInit (id, cmd)
     | _ -> InvalidState "Inventory" |> fail
 
 let evolveAtInit = function

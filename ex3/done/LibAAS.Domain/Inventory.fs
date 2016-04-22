@@ -4,14 +4,12 @@ open LibAAS.Contracts
 open LibAAS.Domain.DomainTypes
 open System
 
-let handleAtInit (id, command) = 
-    match command with
-    | RegisterInventoryItem(item, quantity) -> [ItemRegistered(item, quantity)] |> ok
-    | _ -> raise (exn "Implement me")
+let handleAtInit (id, (command:RegisterInventoryItem)) = 
+    [ItemRegistered(command.Item, command.Quantity)] |> ok
 
 let executeCommand state command =
-    match state with
-    | ItemInit -> handleAtInit command
+    match state, command with
+    | ItemInit, (id, RegisterInventoryItem cmd) -> handleAtInit (id, cmd)
     | _ -> InvalidState "Inventory" |> fail
 
 let evolveAtInit = function

@@ -39,7 +39,7 @@ module ``When loaning an item`` =
         Given {defaultPreconditions 
                 with 
                     presets = [itemAggId, [ItemRegistered(item, qty)]]}
-        |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+        |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
         |> Then ([ItemLoaned 
                     ( loan,
                       LoanDate System.DateTime.Today,
@@ -50,7 +50,7 @@ module ``When loaning an item`` =
         let aggId,loan = createLoanTestData()
 
         Given defaultPreconditions
-        |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+        |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
         |> Then (InvalidItem |> fail)
 
 module ``When returning an item`` =
@@ -66,7 +66,7 @@ module ``When returning an item`` =
     let ``the item is returned``() =
         Given { defaultPreconditions with 
                     presets = [aggId, (itemLoaned (today().AddDays(1 |> float)))]}
-        |> When (aggId, ReturnItem loan.LoanId)
+        |> When (aggId, ReturnItem { Id = loan.LoanId })
         |> Then ([ItemReturned (loan, (today() |> ReturnDate))] |> ok)
 
     [<Fact>]
@@ -75,7 +75,7 @@ module ``When returning an item`` =
         |> List.map (fun x ->
             Given { defaultPreconditions with 
                         presets = [aggId, (itemLoaned (today().AddDays(-x |> float)))]}
-            |> When (aggId, ReturnItem loan.LoanId)
+            |> When (aggId, ReturnItem { Id = loan.LoanId })
             |> Then ([
                         ItemLate (loan, (today() |> ReturnDate), x, Fine (x*100))
                         ] |> ok))

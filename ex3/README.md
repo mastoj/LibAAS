@@ -52,7 +52,7 @@ let ``the loan should be created and due date set``() =
     Given {defaultPreconditions
             with
                 presets = [itemAggId, [ItemRegistered(item, qty)]]}
-    |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+    |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
     |> Then ([ItemLoaned
                 ( loan,
                   LoanDate System.DateTime.Today,
@@ -63,7 +63,7 @@ let ``the user shoul be notified if item doesn't exist``() =
     let aggId,loan = createLoanTestData()
 
     Given defaultPreconditions
-    |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+    |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
     |> Then (InvalidItem |> fail)
   ```
 
@@ -88,26 +88,23 @@ If you look at the test we have two simple business rule, they are
 To handle this we don't do TDD, it would take to much time. We just past in the solution. Functions in the `Loan` module so they look like this:
 
 ```fsharp
-let handleAtInit stateGetters ((aggId:AggregateId), commandData) =
-    match commandData with
-    | LoanItem (loanId, userId, itemId, libraryId) ->
-        itemId |>
-            (stateGetters.GetInventoryItem
-             >=> function
-                 | ItemInit -> InvalidItem |> fail
-                 | _ ->
-                    let loan =
-                        { LoanId = loanId
-                          UserId = userId
-                          ItemId = itemId
-                          LibraryId = libraryId }
-                    let now = DateTime.Today
-                    [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok)
-    | _ -> raise (exn "Implement me")
+let handleAtInit stateGetters ((aggId:AggregateId), (commandData:LoanItem)) = 
+    commandData.ItemId |> 
+        (stateGetters.GetInventoryItem
+            >=> function
+                | ItemInit -> InvalidItem |> fail
+                | _ ->
+                let loan = 
+                    { LoanId = commandData.Id
+                      UserId = commandData.UserId
+                      ItemId = commandData.ItemId
+                      LibraryId = commandData.LibraryId }
+                let now = DateTime.Today
+                [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok)
 
 let executeCommand state stateGetters command =
-    match state with
-    | LoanInit -> handleAtInit stateGetters command
+    match state, command with
+    | LoanInit, (id, LoanItem data) -> handleAtInit stateGetters (id, data)
     | _ -> InvalidState "Loan" |> fail
 ```
 

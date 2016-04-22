@@ -39,7 +39,7 @@ module ``When loaning an item`` =
         Given {defaultPreconditions 
                 with 
                     presets = [itemAggId, [ItemRegistered(item, qty)]]}
-        |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+        |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
         |> Then ([ItemLoaned 
                     ( loan,
                       LoanDate System.DateTime.Today,
@@ -50,5 +50,5 @@ module ``When loaning an item`` =
         let aggId,loan = createLoanTestData()
 
         Given defaultPreconditions
-        |> When (aggId, LoanItem (loan.LoanId, loan.UserId, loan.ItemId, loan.LibraryId))
+        |> When (aggId, LoanItem { Id = loan.LoanId; UserId = loan.UserId; ItemId = loan.ItemId; LibraryId =  loan.LibraryId })
         |> Then (InvalidItem |> fail)

@@ -20,7 +20,7 @@ module ``When returning an item`` =
     let ``the item is returned``() =
         Given { defaultPreconditions with
                     presets = [aggId, (itemLoaned (today().AddDays(1 |> float)))]}
-        |> When (aggId, ReturnItem loan.LoanId)
+        |> When (aggId, ReturnItem { Id = loan.LoanId })
         |> Then ([ItemReturned (loan, (today() |> ReturnDate))] |> ok)
 
     [<Fact>]
@@ -29,7 +29,7 @@ module ``When returning an item`` =
         |> List.map (fun x ->
             Given { defaultPreconditions with
                         presets = [aggId, (itemLoaned (today().AddDays(-x |> float)))]}
-            |> When (aggId, ReturnItem loan.LoanId)
+            |> When (aggId, ReturnItem { Id = loan.LoanId })
             |> Then ([
                         ItemLate (loan, (today() |> ReturnDate), x, Fine (x*100))
                         ] |> ok))

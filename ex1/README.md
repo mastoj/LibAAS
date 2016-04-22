@@ -18,7 +18,7 @@ let item = itemId,book
 let qty = Quantity.Create 10
 
 Given defaultPreconditions
-|> When (aggId, RegisterInventoryItem (item, qty))
+|> When (aggId, RegisterInventoryItem { Item = item; Quantity =  qty })
 |> Then ([ItemRegistered(item, qty)] |> ok)
 ```
 
@@ -51,7 +51,11 @@ We use single discriminated union for `Title`, `Author` and `Quantity`, this wil
 After we have the basic type we can add the command to the `Commands` module in the `Contracts` project. Replace the `RegisterInventoryItem` with the following
 
 ```fsharp
-| RegisterInventoryItem of Item * Quantity
+| RegisterInventoryItem of RegisterInventoryItem
+
+and RegisterInventoryItem = {
+    Item:Item
+    Quantity:Quantity }
 ```
 
 The last type we need to add is the event used in the test. So add that to the `Events` module. The `EventData` definition should look like this when done:
@@ -72,14 +76,12 @@ In the `Inventory` module we have skeleton implementation of what we need. The m
 If you add a break point in the `executeCommand` function you'll see that the `State` is `ItemInit`. That state is defined in `DomainTypes`, and is the state we are interested in right now since nothing has happened and the `Item` should be in its initial stage. To get the test green we need to handle the command, and to address that you need to change the implementation to this:
 
 ```fsharp
-let handleAtInit (id, command) =
-    match command with
-    | RegisterInventoryItem(item, quantity) -> [ItemRegistered(item, quantity)] |> ok
-    | _ -> raise (exn "Implement me")
+let handleAtInit (id, (command:RegisterInventoryItem)) = 
+    [ItemRegistered(command.Item, command.Quantity)] |> ok
 
 let executeCommand state command =
-    match state with
-    | ItemInit -> handleAtInit command
+    match state, command with
+    | ItemInit, (id, RegisterInventoryItem cmd) -> handleAtInit (id, cmd)
     | _ -> raise (exn "Implement me")
 ```
 

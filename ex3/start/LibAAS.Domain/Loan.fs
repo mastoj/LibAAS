@@ -3,16 +3,14 @@ open LibAAS.Contracts
 open LibAAS.Domain.DomainTypes
 open System
 
-let handleAtInit stateGetters ((aggId:AggregateId), commandData) = 
-    match commandData with
-    | _ -> raise (exn "Implement me")
+let handleAtInit stateGetters ((aggId:AggregateId), (commandData:LoanItem)) = 
+    raise (exn "Implement me")
 
-let handleAtCreated data ((aggId:AggregateId), commandData) =
-    match commandData with
-    | _ -> raise (exn "Implement me")
+let handleAtCreated data ((aggId:AggregateId), (commandData:ReturnItem)) =
+    raise (exn "Implement me")
 
-let executeCommand  state stateGetters command =
-    match state with
+let executeCommand state stateGetters command =
+    match state, command with
     | _ -> raise (exn "Implement me")
 
 let evolveAtInit = function
