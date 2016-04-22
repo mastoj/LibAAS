@@ -3,40 +3,34 @@ open LibAAS.Contracts
 open LibAAS.Domain.DomainTypes
 open System
 
-let handleAtInit stateGetters ((aggId:AggregateId), commandData) = 
-    match commandData with
-    | LoanItem (loanId, userId, itemId, libraryId) -> 
-        itemId |> 
-            (stateGetters.GetInventoryItem
-             >=> function
-                 | ItemInit -> InvalidItem |> fail
-                 | _ ->
-                    let loan = 
-                        { LoanId = loanId
-                          UserId = userId
-                          ItemId = itemId
-                          LibraryId = libraryId }
-                    let now = DateTime.Today
-                    [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok)
-    | _ -> raise (exn "Implement me")
+let handleAtInit stateGetters ((aggId:AggregateId), (commandData:LoanItem)) = 
+    commandData.ItemId |> 
+        (stateGetters.GetInventoryItem
+            >=> function
+                | ItemInit -> InvalidItem |> fail
+                | _ ->
+                let loan = 
+                    { LoanId = commandData.Id
+                      UserId = commandData.UserId
+                      ItemId = commandData.ItemId
+                      LibraryId = commandData.LibraryId }
+                let now = DateTime.Today
+                [ItemLoaned (loan, LoanDate now, DueDate (now.AddDays(7.)))] |> ok)
 
-let handleAtCreated data ((aggId:AggregateId), commandData) =
-    match commandData with
-    | ReturnItem cData -> 
-        let now = DateTime.Today
-        let (DueDate duedate) = data.DueDate
-        let daysLate = (now - duedate).Days
-        let fine = 100 * daysLate
-        if now > duedate then 
-            [ItemLate (data.Loan, ReturnDate now, daysLate, Fine fine )] |> ok
-        else 
-            [ItemReturned (data.Loan, ReturnDate now )] |> ok
-    | _ -> InvalidState "Loan at created" |> fail
+let handleAtCreated data ((aggId:AggregateId), (commandData:ReturnItem)) =
+    let now = DateTime.Today
+    let (DueDate duedate) = data.DueDate
+    let daysLate = (now - duedate).Days
+    let fine = 100 * daysLate
+    if now > duedate then 
+        [ItemLate (data.Loan, ReturnDate now, daysLate, Fine fine )] |> ok
+    else 
+        [ItemReturned (data.Loan, ReturnDate now )] |> ok
 
 let executeCommand state stateGetters command =
-    match state with
-    | LoanInit -> handleAtInit stateGetters command
-    | LoanCreated data -> command |> handleAtCreated data
+    match state, command with
+    | LoanInit, (id, LoanItem data) -> handleAtInit stateGetters (id, data)
+    | LoanCreated data, (id, ReturnItem cmd) -> (id, cmd) |> handleAtCreated data
     | _ -> InvalidState "Loan" |> fail
 
 let evolveAtInit = function
