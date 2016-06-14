@@ -1,12 +1,25 @@
 #r @"packages/FAKE/tools/FakeLib.dll"
+open System
 open Fake
 open Fake.Testing.XUnit2
 
 let testDir = ".test"
 
-let createBuildAndTest proj version = 
+let targetName = getBuildParam "target"
+trace (sprintf "Target name: %s" targetName)
+let targets = ["Ex1Start";"Ex1Done";"Ex3Start";"Ex2Done";"Ex3Start";"Ex3Done";"Ex4Start"] |> List.map (fun s -> s.ToLower())
+
+if targets |> List.contains (targetName.ToLower()) |> not then
+    let targetNames = String.Join("|", targets)
+    let msg = sprintf "Missing target, use: ./build.sh <%s>" targetNames
+    traceError "Missing target, use: ./build.sh <Ex1Start|Ex1Done|Ex3Start|Ex2Done|Ex3Start|Ex3Done|Ex4Start>"
+    exit -1
+let (proj,version) = (targetName.Substring(0,3), targetName.Substring(3))
+let basePath = sprintf "./%s/%s" proj version
+
+let createBuildAndTest proj version =
   let basePath = sprintf "./%s/%s" proj version
-  let build() = 
+  let build() =
       trace (sprintf "Building %s %s" proj version)
       let sln = !! (basePath </> "*.sln")
       trace (sprintf "Will build solution: %A" sln)
@@ -14,12 +27,12 @@ let createBuildAndTest proj version =
       |> MSBuildRelease "" "Rebuild"
       |> ignore
 
-  let test() =     
+  let test() =
     let testDlls = !!(basePath </> "*.Tests/bin/Debug/*.Tests.dll")
-    testDlls 
+    testDlls
     |> xUnit2 (fun p -> { p with HtmlOutputPath = Some (testDir @@ "xunit.html") })
-    
-  let restorePackages() = 
+
+  let restorePackages() =
     basePath </> "**/packages.config"
     |> RestorePackage (fun p ->
         { p with
@@ -27,7 +40,7 @@ let createBuildAndTest proj version =
             OutputPath = (basePath </> "packages")
             Retries = 4 })
     |> ignore
- 
+
   fun _ ->
     restorePackages()
     build()
@@ -37,26 +50,12 @@ Target "Default" (fun _ ->
   trace "Hello default"
 )
 
-// Target "Ex1Start" (createBuildAndTest "ex1" "start")
-// Target "Ex1Done" (createBuildAndTest "ex1" "done")
-// Target "Ex2Start" (createBuildAndTest "ex2" "start")
-// Target "Ex2Done" (createBuildAndTest "ex2" "done")
-// Target "Ex3Start" (createBuildAndTest "ex3" "start")
-// Target "Ex3Done" (createBuildAndTest "ex3" "done")
-// Target "Ex4Start" (createBuildAndTest "ex4" "start")
-// Target "Ex4Done" (createBuildAndTest "ex4" "done")
-
-let targetName = getBuildParam "target"
-trace (sprintf "Target name: %s" targetName)
-let (proj,version) = (targetName.Substring(0,3), targetName.Substring(3))
-let basePath = sprintf "./%s/%s" proj version
-
 Target "RestorePackages" (fun _ ->
   let packagesFolder = basePath </> "packages"
   !!(basePath </> "**/packages.config")
-  |> Seq.iter 
-      (RestorePackage (fun parameters -> 
-                        { parameters with 
+  |> Seq.iter
+      (RestorePackage (fun parameters ->
+                        { parameters with
                             OutputPath = packagesFolder}))
 )
 
@@ -71,7 +70,7 @@ Target "Build" (fun _ ->
 
 Target "Test" (fun _ ->
   let testDlls = !!(basePath </> "*.Tests/bin/Debug/*.Tests.dll")
-  testDlls 
+  testDlls
   |> xUnit2 (fun p -> p)
 )
 
