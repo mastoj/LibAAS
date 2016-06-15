@@ -12,7 +12,7 @@ let targets = ["Ex1Start";"Ex1Done";"Ex3Start";"Ex2Done";"Ex3Start";"Ex3Done";"E
 if targets |> List.contains (targetName.ToLower()) |> not then
     let targetNames = String.Join("|", targets)
     let msg = sprintf "Missing target, use: ./build.sh <%s>" targetNames
-    traceError "Missing target, use: ./build.sh <Ex1Start|Ex1Done|Ex3Start|Ex2Done|Ex3Start|Ex3Done|Ex4Start>"
+    targets |> String.concat "|" |> sprintf "Missing target, use: ./build.sh <%s>" |> traceError
     exit -1
 let (proj,version) = (targetName.Substring(0,3), targetName.Substring(3))
 let basePath = sprintf "./%s/%s" proj version
