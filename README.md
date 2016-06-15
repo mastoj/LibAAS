@@ -7,7 +7,7 @@ The language in the application is F#, mainly because event sourcing is function
 
 The fictive domain that will be used is library as a service, where you will be able to register items as well as loan them. It shouldn't be that hard to implement more features, but that is enough for this sample tutorial.
 
-Everything should work on Linux, OSX or Windows. To run on non Windows you can run `build.sh Ex1Start` to build and test the first exercise. Targets you can start are `Ex1Start`,`Ex1Done`,`Ex3Start`,`Ex2Done`,`Ex3Start`,`Ex3Done`,`Ex4Start` and `Ex4Done`. On Windows you can build from Visual Studio or run `build.cmd` with the same arguments as for `build.sh`.
+Everything should work on Linux, OSX or Windows. To run on non-Windows you can run `build.sh ex1start` to build and test the first exercise. Targets you can start are `ex1start`,`ex1done`,`ex3start`,`ex2done`,`ex3start`,`ex3done`,`ex4start` and `ex4done`. On Windows you can build from Visual Studio or run `build.cmd` with the same arguments as for `build.sh`.
 
 You can go straight to [exercise 1](ex1/README.md) or read some background things information first.
 
