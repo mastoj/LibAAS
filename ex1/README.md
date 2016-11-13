@@ -46,7 +46,7 @@ type ItemData =
 type Item = ItemId*ItemData
 ```
 
-We use single discriminated union for `Title`, `Author` and `Quantity`, this will make the code more type safe since it is now impossible to switch those to values with each other as it would if they were just of type `string`. We do the same for `Quantity`, but here we take it one step further making the constructor of the case `private`, thus forcing the user to use the `Create` method to create a valid value. If you need to serialize and deserialize this value you need to add `CLIMutable` I think.
+We use single [discriminated union](http://fsharpforfunandprofit.com/posts/discriminated-unions/) for `Title`, `Author` and `Quantity`, this will make the code more type safe since it is now impossible to switch those to values with each other as it would if they were just of type `string`. We do the same for `Quantity`, but here we take it one step further making the constructor of the case `private`, thus forcing the user to use the `Create` method to create a valid value. If you need to serialize and deserialize this value you need to add `CLIMutable` I think.
 
 After we have the basic type we can add the command to the `Commands` module in the `Contracts` project. Replace the `RegisterInventoryItem` with the following
 
