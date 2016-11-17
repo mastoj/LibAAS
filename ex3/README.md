@@ -73,7 +73,7 @@ Again, it doesn't compile since we are missing the command and event definitions
 
 To get the solution to build again you need to do the following:
 
-1. Add the command `LoanItem` to the `CommandData` discriminated union with the type arguments `LoanId * UserId * ItemId * LibraryId`.
+1. Add the the type `LoanItem` under the `CommandData` discriminated union with the type arguments: `and LoanItem = { Id:LoanId UserId:UserId ItemId:ItemId LibraryId:LibraryId }`.
 2. Add the event `ItemLoaned` to the `EventData` discriminated union with the type arguments `Loan * LoanDate * DueDate`
 3. Add the types `LoanDate` and `DueDate` to the `Types` module. They both should have type `xxxDate of DateTime`, again we create wrapper types to get more help from the compiler to stop us from doing stupid mistakes.
 
@@ -88,13 +88,13 @@ If you look at the test we have two simple business rule, they are
 To handle this we don't do TDD, it would take to much time. We just past in the solution. Functions in the `Loan` module so they look like this:
 
 ```fsharp
-let handleAtInit stateGetters ((aggId:AggregateId), (commandData:LoanItem)) = 
-    commandData.ItemId |> 
+let handleAtInit stateGetters ((aggId:AggregateId), (commandData:LoanItem)) =
+    commandData.ItemId |>
         (stateGetters.GetInventoryItem
             >=> function
                 | ItemInit -> InvalidItem |> fail
                 | _ ->
-                let loan = 
+                let loan =
                     { LoanId = commandData.Id
                       UserId = commandData.UserId
                       ItemId = commandData.ItemId
