@@ -120,3 +120,5 @@ MetricResults/
 _configs/
 .fake/
 .paket/
+.idea/
+.ionide/
