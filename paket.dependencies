@@ -1,5 +1,0 @@
-source https://nuget.org/api/v2
-
-nuget FAKE 4.9.3
-nuget NuGet.CommandLine 2.8.6
-nuget xunit.runner.console 2.1.0

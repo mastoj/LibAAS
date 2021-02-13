@@ -1,63 +1,81 @@
-#r @"packages/FAKE/tools/FakeLib.dll"
-open System
-open Fake
-open Fake.Testing.XUnit2
+#r "paket:
+nuget Fake.DotNet.Cli
+nuget Fake.IO.FileSystem
+nuget Fake.Core.Target //"
+#load ".fake/build.fsx/intellisense.fsx"
+open Fake.Core
+open Fake.DotNet
+open Fake.IO
+open Fake.IO.FileSystemOperators
+open Fake.IO.Globbing.Operators
+open Fake.Core.TargetOperators
 
-let testDir = ".test"
+Target.initEnvironment ()
 
-let targetName = getBuildParam "target"
-trace (sprintf "Target name: %s" targetName)
-let targets = ["Ex1Start";"Ex1Done";"Ex2Start";"Ex2Done";"Ex3Start";"Ex3Done";"Ex4Start";"Ex4Start"] |> List.map (fun s -> s.ToLower())
-
-if targets |> List.contains (targetName.ToLower()) |> not then
-    let targetNames = String.Join("|", targets)
-    let msg = sprintf "Missing target, use: ./build.sh <%s>" targetNames
-    targets |> String.concat "|" |> sprintf "Missing target, use: ./build.sh <%s>" |> traceError
-    exit -1
-let (proj,version) = (targetName.Substring(0,3), targetName.Substring(3))
-let basePath = sprintf "./%s/%s" proj version
-
-// Add targets so they are found by the Ionide FAKE plugin
-Target "Ex1Start" ignore
-Target "Ex1Done" ignore
-Target "Ex2Start" ignore
-Target "Ex2Done" ignore
-Target "Ex3Start" ignore
-Target "Ex3Done" ignore
-Target "Ex4Start" ignore
-Target "Ex4Done" ignore
-
-Target "Default" (fun _ ->
-  trace "Hello default"
+Target.create "Clean" (fun _ ->
+    !! "./**/bin"
+    ++ "./**/obj"
+    |> Shell.cleanDirs 
 )
 
-Target "RestorePackages" (fun _ ->
-  let packagesFolder = basePath </> "packages"
-  !!(basePath </> "**/packages.config")
-  |> Seq.iter
-      (RestorePackage (fun parameters ->
-                        { parameters with
-                            OutputPath = packagesFolder}))
-)
+let build target =
+  !! (target + "/*.sln")
+  |> Seq.iter (DotNet.build id)
 
-Target "Build" (fun _ ->
-  trace (sprintf "Building %s %s" proj version)
-  let sln = !! (basePath </> "*.sln")
-  trace (sprintf "Will build solution: %A" sln)
-  sln
-  |> MSBuildDebug "" "Rebuild"
-  |> ignore
-)
+let test target =
+  !! (target + "/*.sln")
+  |> Seq.iter (DotNet.test id)
 
-Target "Test" (fun _ ->
-  let testDlls = !!(basePath </> "*.Tests/bin/Debug/*.Tests.dll")
-  testDlls
-  |> xUnit2 (fun p -> p)
-)
+let restore target =
+  !! (target + "/*.sln")
+  |> Seq.iter (DotNet.restore id)
 
-"RestorePackages"
-  ==> "Build"
-  ==> "Test"
-  ==> "Default"
+let buildAndTest (context:TargetParameter) target =
+  // Trace.log "--- Context ---"
+  // Trace.log (context.ToString())
+  // Trace.log "---------------"
+  let cmd = 
+    if not context.Context.Arguments.IsEmpty then
+      context.Context.Arguments.Head.ToLower()
+    else ""
+  match cmd with   
+  | "test" -> test target
+  | "restore" -> restore target
+  | _ -> build target
+    
 
-Run "Default"
+Target.create "Ex1Start" (fun x -> buildAndTest x "ex1/start")
+Target.create "Ex1Done" (fun x -> buildAndTest x "ex1/done")
+Target.create "Ex2Start" (fun x -> buildAndTest x "ex2/start")
+Target.create "Ex2Done" (fun x -> buildAndTest x "ex2/done")
+Target.create "Ex3Start" (fun x -> buildAndTest x "ex3/start")
+Target.create "Ex3Done" (fun x -> buildAndTest x "ex3/done")
+Target.create "Ex4Start" (fun x -> buildAndTest x "ex4/start")
+Target.create "Ex4Done" (fun x -> buildAndTest x "ex4/done")
+
+Target.create "All" ignore
+
+"Clean"
+  ==> "Ex1Start" 
+"Clean"
+  ==> "Ex1Done" 
+"Clean"
+  ==> "Ex2Start"
+"Clean"
+  ==> "Ex2Done" 
+"Clean"
+  ==> "Ex3Start"
+"Clean"
+  ==> "Ex3Done" 
+"Clean"
+  ==> "Ex4Start"
+"Clean"
+  ==> "Ex4Done" 
+"Clean"
+  ==> "Ex4Done"==> "Ex4Start" 
+  <=> "Ex3Done" <=> "Ex3Start"
+  <=> "Ex2Done" <=> "Ex2Start"
+  <=> "Ex1Done" <=> "Ex1Start"
+  ==> "All"
+
+Target.runOrDefaultWithArguments "All"
